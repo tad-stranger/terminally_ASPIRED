@@ -9,8 +9,10 @@ from matplotlib.colors import LogNorm
 import plotly.io as pio
 import lacosmic
 from pathlib import Path
+import pandas as pd
 import glob
 import os
+import lineid_plot
 
 def extract_1D_spectrum(science_data):
     spectrum_1d = np.sum(science_data, axis = 0)
@@ -68,15 +70,36 @@ def trim_and_save_folder(input_dir, output_dir, x_min, x_max, y_min, y_max):
         filename = Path(file).name
         fits.writeto(os.path.join(output_dir, filename), trimmed, header, overwrite=True)
 
+
+def plot_csv_final_spectrum(filename, scale):
+    data = pd.read_csv(filename, sep = ' ')
+    lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 440]
+    line_names = ['H-α', 'H-β', 'H-γ', 'H-δ', 'H-ζ', 'H-η', 'HeI', 'HeII']
+
+    wavelength = data['wav'] / 10
+    flux = data['flux']
+
+
+    lineid_plot.plot_line_ids(wavelength, flux, lines, line_names, color='blue', linewidth=0.75)
+    plt.xlabel('Wavelength (nm)')
+    plt.ylabel('Flux [arb]')
+    if scale == 'log':
+        plt.yscale('log')
+    plt.title(f'{object_name} Reduced Spectrum', pad=60)
+    plt.savefig(f'{output_dir}/{object_name}_final_{scale}.png')
+    plt.show()
+
+
+
 pio.renderers.default = "browser"
 
 ''' 1 - Extract Data'''
 
 # Set Observation date path
-observations_path = "Transients Observations/17042025/"
+observations_path = "Transients Observations/0505/"
 
 # Extract Science images
-sci_data, hdr_sci = extract_data(f"{observations_path}SCIENCE/SN2024xuo/a6261089.fits")
+sci_data, hdr_sci = extract_data(f"{observations_path}SCIENCE/Gaia6237/a6281006.fits")
 sci_data = np.flip(sci_data, axis = 1)
 
 # Extract Object Info
@@ -85,11 +108,11 @@ tar_RA = hdr_sci.get('TARG-RA')
 tar_DEC = hdr_sci.get('TARG-DEC')
 
 # Extract ARC Images:
-arc_data, hdr_arc = extract_data(f"{observations_path}ARC/a6261038.fits")
+arc_data, hdr_arc = extract_data("Transients Observations/0503/ARC/a6281115.fits")#extract_data(f"{observations_path}ARC/a6281115.fits")
 arc_data = np.flip(arc_data,axis = 1)
 
 # Extract Standard Star (For Flux Calibration)
-std_data, std_hdr = extract_data(f"{observations_path}SCIENCE/HILT600/a6261086.fits")
+std_data, std_hdr = extract_data("Transients Observations/0503/SCIENCE/HILT600/a6281069.fits") #extract_data(f"{observations_path}SCIENCE/HILT600/a6281069.fits")
 std_data = np.flip(std_data,axis = 1)
 
 # Plot Raw Image for inspection
@@ -103,10 +126,9 @@ plot_spectrum(raw_1D_spectrum, keyword = 'Raw')
 
 '''Image Reduction'''
 
-
 '''Setting up Image Reduction'''
-bias_folder = f"{observations_path}BIASS"
-flats_folder = f"{observations_path}FLATS"
+bias_folder = f"{observations_path}BIAS"
+flats_folder = f"{observations_path}FLAT"
 
 # Make Output Directory
 output_dir = Path(f"./ReducedSpectra/{object_name.replace(' ', '')}")
@@ -153,7 +175,7 @@ standard_frame.save_fits(filename = f"{object_name.replace(' ', '')}_standard_im
 # 2.1 Trimming
 x_min = 184;
 x_max = 1984;
-y_min = 41; #34
+y_min = 50; #34
 y_max = 94; #94
 
 
@@ -197,7 +219,7 @@ science2D = spectral_reduction.TwoDSpec(reduced_sci_data, cosmicray = False, hea
 science2D.set_properties(saxis = 1, flip = False, cosmicray = False)
 #science2D.apply_flip_to_arc()
 science2D.ap_trace(nspec = n_sources, nwindow= 100, trace_width = 5, resample_factor= 15, fit_deg= 3, display = True, width = 1024, height = 1024)
-science2D.ap_extract(apwidth = 3, optimal = True, algorithm = 'marsh89', skysep = 5, skywidth = 10, skydeg = 1, display=True)
+science2D.ap_extract(apwidth = 3, optimal = True, algorithm = 'marsh89', skysep = 2, skywidth = 5, skydeg = 1, display=True)
 science2D.add_arc(arc = clean_arc_data)
 science2D.extract_arc_spec()
 
@@ -205,10 +227,11 @@ science2D.extract_arc_spec()
 standard2D = spectral_reduction.TwoDSpec(clean_std_data, cosmicray = False, header=std_hdr)
 standard2D.set_properties(saxis = 1, flip = False, cosmicray = False)
 #standard2D.apply_flip_to_arc()
-standard2D.ap_trace(nspec = n_sources, nwindow= 20, trace_width = 5, resample_factor= 2, fit_deg= 3, display = False, width = 1024, height = 1024)
-standard2D.ap_extract(apwidth = 3, optimal = True, algorithm = 'marsh89', skysep = 0, skywidth = 5, skydeg = 1, display=True)
+standard2D.ap_trace(nspec = n_sources, nwindow= 20, trace_width = 5, resample_factor= 2, fit_deg= 2, display = False, width = 1024, height = 1024)
+standard2D.ap_extract(apwidth = 5, optimal = True, algorithm = 'marsh89', skysep = 7, skywidth = 10, skydeg = 1, display=True)
 standard2D.add_arc(arc = clean_arc_data)
 standard2D.extract_arc_spec()
+
 
 
 ''' 3 - Wavelength Calibration with ARC Lamp'''
@@ -239,12 +262,11 @@ onedspec.add_user_atlas(elements= element, wavelengths = atlas, stype = 'science
 onedspec.set_hough_properties(num_slopes = 1000, xbins = 100, ybins = 100, min_wavelength = 3500, max_wavelength=9000, range_tolerance= 250, stype= 'science+standard')
 
 onedspec.do_hough_transform(stype = 'science+standard')
-onedspec.set_ransac_properties(minimum_matches=15)#normal = 15
-onedspec.fit(max_tries = 1000, fit_deg = 3, fit_type = 'poly', display = True, stype = 'science+standard')
+onedspec.set_ransac_properties(minimum_matches=10)#normal = 15
+onedspec.fit(max_tries = 1000, fit_deg = 3, fit_type = 'poly', display = True, stype = 'science+standard', return_solution=True)
 onedspec.apply_wavelength_calibration(stype = 'science+standard')
 onedspec.inspect_reduced_spectrum(display = True, stype = 'science')
 onedspec.inspect_reduced_spectrum(display = True, stype = 'standard')
-
 
 '''Flux Calibration'''
 onedspec.load_standard(target = 'hilt600') # Loads Literature standard star spectrum
@@ -255,6 +277,50 @@ onedspec.inspect_sensitivity()
 
 onedspec.apply_flux_calibration()
 
+
 '''See the fully reduced spectrum'''
-onedspec.inspect_reduced_spectrum(display = True, stype = 'science', save_fig= True, filename = object_name + '-reduced_spectrum', fig_type= 'png')
+onedspec.inspect_reduced_spectrum(display = True, stype = 'science')
 onedspec.inspect_reduced_spectrum(display = True, stype = 'standard')
+
+
+
+
+'''Output to CSC file'''
+
+# Ensure output_dir is a Path object
+output_dir = Path(output_dir)
+
+onedspec.save_csv(
+    stype='science',
+    spec_id=0,
+    output='*',
+    filename=output_dir / object_name,
+    overwrite=True
+)
+
+
+# Save CSVs — use flux instead of count
+onedspec.save_csv(
+    stype='science',
+    spec_id=0,
+    output='wavelength+flux',
+    filename=output_dir / object_name,
+    overwrite=True
+)
+
+# Read the CSVs
+wav = pd.read_csv(output_dir / f"{object_name}_science_wavelength.csv", skiprows=1, names=['wav'])
+flux = pd.read_csv(output_dir / f"{object_name}_science_flux.csv", skiprows=1, names=['flux', 'uflux', 'sky'])
+
+# Merge and save final CSVs
+merged = pd.concat([wav, flux['flux']], axis=1)
+merged.to_csv(output_dir / f"{object_name}.csv", header=True, index=False)
+merged.to_csv(f"{object_name}.csv", header=True, index=False)
+
+# Save SNID file (space-separated)
+snid_file = pd.concat([wav, flux['flux']], axis=1)
+snid_file.to_csv(output_dir / f"{object_name}_final.csv", sep=' ', header=True, index=False)
+
+# Plot the final spectrum
+plot_csv_final_spectrum(output_dir / f"{object_name}_final.csv", scale= 'linear')
+plot_csv_final_spectrum(output_dir / f"{object_name}_final.csv", scale= 'log')
