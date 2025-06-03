@@ -7,11 +7,9 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import plotly.io as pio
-import lacosmic
 from pathlib import Path
 import pandas as pd
 import glob
-import os
 import lineid_plot
 
 def extract_1D_spectrum(science_data):
@@ -59,7 +57,7 @@ def write_filelist_for_aspired(bias_dir, flat_dir, science_file, arc_file, outpu
 
     print(f"Filelist written to {output_name}")
 
-def trim_and_save_folder(input_dir, output_dir, x_min, x_max, y_min, y_max):
+'''def trim_and_save_folder(input_dir, output_dir, x_min, x_max, y_min, y_max):
 
     os.makedirs(output_dir, exist_ok=True)
     fits_files = glob.glob(f"{input_dir}/*.fits")
@@ -68,7 +66,7 @@ def trim_and_save_folder(input_dir, output_dir, x_min, x_max, y_min, y_max):
         data, header = fits.getdata(file, header=True)
         trimmed = data[y_min:y_max, x_min:x_max]
         filename = Path(file).name
-        fits.writeto(os.path.join(output_dir, filename), trimmed, header, overwrite=True)
+        fits.writeto(os.path.join(output_dir, filename), trimmed, header, overwrite=True)'''
 
 
 def plot_csv_final_spectrum(filename, scale):
@@ -96,10 +94,10 @@ pio.renderers.default = "browser"
 ''' 1 - Extract Data'''
 
 # Set Observation date path
-observations_path = "Transients Observations/0505/"
+observations_path = "Transients Observations/0503/"
 
 # Extract Science images
-sci_data, hdr_sci = extract_data(f"{observations_path}SCIENCE/Gaia6237/a6281006.fits")
+sci_data, hdr_sci = extract_data(f"{observations_path}SCIENCE/Gaia3513/a6281006.fits")
 sci_data = np.flip(sci_data, axis = 1)
 
 # Extract Object Info
@@ -252,7 +250,7 @@ onedspec.find_arc_lines(prominence=7, refine=True, display=True, stype='science+
          #5606.7330, 5739.5200, 5834.2630, 5860.3100, 5888.5840, 5912.0850, 5928.8130, 6032.1270]
 
 atlas = [4158.59, 4200.67, 4277.53, 4609.57, 4764.86, 4879.86, 6032.127, 6965.43, 7067.21, 7272.94, 7383.9, 7503.87,
-         7635.11, 7948.18, 8014.79, 8115.31, 8264.52, 8521.44, 9122.97, 9224.50]
+         7635.11, 7948.18, 8014.79, 8115.31, 8264.52, 8521.44, 9122.97, 9224.50] #Grating 7
 
 
 element = ['CuAr']*len(atlas)
@@ -262,7 +260,7 @@ onedspec.add_user_atlas(elements= element, wavelengths = atlas, stype = 'science
 onedspec.set_hough_properties(num_slopes = 1000, xbins = 100, ybins = 100, min_wavelength = 3500, max_wavelength=9000, range_tolerance= 250, stype= 'science+standard')
 
 onedspec.do_hough_transform(stype = 'science+standard')
-onedspec.set_ransac_properties(minimum_matches=10)#normal = 15
+onedspec.set_ransac_properties(minimum_matches=10)#normal = 153
 onedspec.fit(max_tries = 1000, fit_deg = 3, fit_type = 'poly', display = True, stype = 'science+standard', return_solution=True)
 onedspec.apply_wavelength_calibration(stype = 'science+standard')
 onedspec.inspect_reduced_spectrum(display = True, stype = 'science')
@@ -315,7 +313,7 @@ flux = pd.read_csv(output_dir / f"{object_name}_science_flux.csv", skiprows=1, n
 # Merge and save final CSVs
 merged = pd.concat([wav, flux['flux']], axis=1)
 merged.to_csv(output_dir / f"{object_name}.csv", header=True, index=False)
-merged.to_csv(f"{object_name}.csv", header=True, index=False)
+#merged.to_csv(f"{object_name}.csv", header=True, index=False)
 
 # Save SNID file (space-separated)
 snid_file = pd.concat([wav, flux['flux']], axis=1)

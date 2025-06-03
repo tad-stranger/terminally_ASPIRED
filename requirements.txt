@@ -1,0 +1,74 @@
+asdf==4.1.0
+asdf-astropy==0.7.1
+asdf_coordinates_schemas==0.3.0
+asdf_standard==1.1.1
+asdf_transform_schemas==0.5.0
+asdf_wcs_schemas==0.4.0
+aspired==0.5.1
+astropy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a0fm0x2tco/croot/astropy_1738094414286/work
+astropy-iers-data==0.2025.3.24.0.35.32
+astropy_healpix==1.1.2
+astroscrappy==1.2.0
+attrs==25.3.0
+Brotli @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_f7i0oxypt6/croot/brotli-split_1736182464088/work
+ccdproc==2.4.3
+click==8.1.8
+cloudpickle==3.1.1
+contourpy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_2cvjf0v4ux/croot/contourpy_1732540055997/work
+crc32c==2.7.1
+cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
+dask==2025.3.0
+Deprecated==1.2.18
+donfig==0.8.1.post1
+fonttools @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_ce1jt_55vl/croot/fonttools_1737039388732/work
+fsspec==2025.3.2
+gwcs==0.24.0
+imageio==2.37.0
+importlib_metadata==8.6.1
+jmespath==1.0.1
+joblib @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_8ff7uji0v2/croot/joblib_1718217225309/work
+kaleido==0.2.1
+kiwisolver @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_cc2l_z_0ri/croot/kiwisolver_1737039586949/work
+lacosmic==1.1.0
+lazy_loader==0.4
+lineid-plot==0.6
+locket==1.0.0
+matplotlib==3.10.0
+narwhals==1.33.0
+ndcube==2.3.1
+networkx==3.4.2
+numcodecs==0.15.1
+numpy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_c1bynexs0d/croot/numpy_and_numpy_base_1742570425060/work/dist/numpy-2.2.4-cp311-cp311-macosx_11_0_arm64.whl#sha256=8666689a77afd53d9c82141c4386e9ea8edd22a2238fd324a4e459f65f1ab41d
+packaging @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_a6_qk3qyg7/croot/packaging_1734472142254/work
+pandas==2.2.3
+partd==1.4.2
+patsy==1.0.1
+pillow @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_85xj2lenf1/croot/pillow_1738010251686/work
+plotly==6.0.1
+pyerfa @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_32yar1dp0d/croot/pyerfa_1738082795115/work
+pynverse==0.1.4.6
+pyparsing @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_65qfw6vkxg/croot/pyparsing_1731445528142/work
+python-dateutil @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_66ud1l42_h/croot/python-dateutil_1716495741162/work
+pytz==2025.2
+PyYAML @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_faoex52hrr/croot/pyyaml_1728657970485/work
+rascal==0.3.8.1
+reproject==0.14.1
+scikit-image==0.25.2
+scikit-learn @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_2coq3750ge/croot/scikit-learn_1737988773864/work
+scipy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_cc_7w74fto/croot/scipy_1743153255057/work/dist/scipy-1.15.2-cp311-cp311-macosx_11_0_arm64.whl#sha256=d4195a2fc0e73893d720ae2082bacfaffbe7d870613a21aff44a2d207ac0efc2
+semantic-version==2.10.0
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+spectresc==1.0.4
+specutils==1.19.0
+statsmodels==0.14.4
+threadpoolctl @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_efa5bvb6vi/croot/threadpoolctl_1719407806403/work
+tifffile==2025.3.30
+toolz==1.0.0
+tornado @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_0axef5a0m0/croot/tornado_1733960501260/work
+tqdm==4.67.1
+typing_extensions==4.13.0
+tzdata==2025.2
+unicodedata2 @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_b99hn8t9lq/croot/unicodedata2_1736541774279/work
+wrapt==1.17.2
+zarr==3.0.6
+zipp==3.21.0
