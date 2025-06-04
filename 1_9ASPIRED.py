@@ -40,8 +40,8 @@ def plot_spectrum(spec_data, keyword):
     plt.show()
 
 def write_filelist_for_aspired(bias_dir, flat_dir, science_file, arc_file, output_name="aspired_filelist.list"):
-    '''This function loads the science and calibration frames in a filelist
-    in a format which ASPIRED can read'''
+    """This function loads the science and calibration frames in a filelist
+    in a format which ASPIRED can read"""
 
 
     bias_files = sorted(glob.glob(f"{bias_dir}/*.fits"))
@@ -94,10 +94,10 @@ pio.renderers.default = "browser"
 ''' 1 - Extract Data'''
 
 # Set Observation date path
-observations_path = "Transients Observations/0503/"
+observations_path = "17042025/17042025/"
 
 # Extract Science images
-sci_data, hdr_sci = extract_data(f"{observations_path}SCIENCE/Gaia3513/a6281006.fits")
+sci_data, hdr_sci = extract_data(f"{observations_path}SCIENCE/SN2024xuo/a6261089.fits")
 sci_data = np.flip(sci_data, axis = 1)
 
 # Extract Object Info
@@ -106,11 +106,11 @@ tar_RA = hdr_sci.get('TARG-RA')
 tar_DEC = hdr_sci.get('TARG-DEC')
 
 # Extract ARC Images:
-arc_data, hdr_arc = extract_data("Transients Observations/0503/ARC/a6281115.fits")#extract_data(f"{observations_path}ARC/a6281115.fits")
+arc_data, hdr_arc = extract_data("17042025/17042025/ARC/a6261090.fits")#extract_data(f"{observations_path}ARC/a6281115.fits")
 arc_data = np.flip(arc_data,axis = 1)
 
 # Extract Standard Star (For Flux Calibration)
-std_data, std_hdr = extract_data("Transients Observations/0503/SCIENCE/HILT600/a6281069.fits") #extract_data(f"{observations_path}SCIENCE/HILT600/a6281069.fits")
+std_data, std_hdr = extract_data("17042025/17042025/SCIENCE/HR3454/a6261084.fits") #extract_data(f"{observations_path}SCIENCE/HILT600/a6281069.fits")
 std_data = np.flip(std_data,axis = 1)
 
 # Plot Raw Image for inspection
@@ -125,8 +125,8 @@ plot_spectrum(raw_1D_spectrum, keyword = 'Raw')
 '''Image Reduction'''
 
 '''Setting up Image Reduction'''
-bias_folder = f"{observations_path}BIAS"
-flats_folder = f"{observations_path}FLAT"
+bias_folder = ""#f"{observations_path}BIAS"
+flats_folder = ""#f"{observations_path}FLAT"
 
 # Make Output Directory
 output_dir = Path(f"./ReducedSpectra/{object_name.replace(' ', '')}")
@@ -171,10 +171,10 @@ standard_frame.save_fits(filename = f"{object_name.replace(' ', '')}_standard_im
 
 '''2 - Trimming and Cosmic Ray Removal'''
 # 2.1 Trimming
-x_min = 184;
-x_max = 1984;
-y_min = 50; #34
-y_max = 94; #94
+x_min = 184
+x_max = 1984
+y_min = 50  #34
+y_max = 94  #94
 
 
 
