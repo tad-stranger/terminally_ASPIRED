@@ -1,3 +1,5 @@
+import os
+
 from astropy.io import fits
 from aspired import image_reduction, spectral_reduction
 from astroscrappy import detect_cosmics
@@ -97,7 +99,7 @@ def visualise_raw_data(sci_data, object_name):
 
 def prepare_output_directory(object_name):
     output_dir = Path(f"./ReducedSpectra/{object_name.replace(' ', '')}")
-    output_dir.mkdir(exist_ok=True)
+    output_dir.mkdir(exist_ok=True, parents=True)
     return output_dir
 
 def save_fits_files(sci_data, hdr_sci, arc_data, hdr_arc, std_data, std_hdr, output_dir, object_name):
