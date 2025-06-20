@@ -1,5 +1,4 @@
 import os
-
 from astropy.io import fits
 from aspired import image_reduction, spectral_reduction
 from astroscrappy import detect_cosmics
@@ -13,6 +12,8 @@ from pathlib import Path
 import pandas as pd
 import glob
 import lineid_plot
+from matplotlib.widgets import RectangleSelector
+import json
 
 def extract_1D_spectrum(science_data):
     spectrum_1d = np.sum(science_data, axis = 0)
@@ -175,7 +176,8 @@ def extract_twodspec(data, arc_data, header, n_sources=1, is_standard=False, dis
     twod.extract_arc_spec()
     return twod
 
-def wavelength_calibration(science2D, standard2D, atlas, element):
+def wavelength_calibration(science2D, standard2D, atlas):
+    element = ['CuAr'] * len(atlas)
     onedspec = spectral_reduction.OneDSpec()
     onedspec.from_twodspec(science2D, stype='science')
     onedspec.from_twodspec(standard2D, stype='standard')
@@ -207,8 +209,8 @@ def save_final_spectra(onedspec, object_name, output_dir):
     output_dir = Path(output_dir)
 
     # Save full CSVs
-    onedspec.save_csv(stype='science', spec_id=0, output='*',
-                      filename=output_dir / object_name, overwrite=True)
+    #onedspec.save_csv(stype='science', spec_id=0, output='*',
+                      #filename=output_dir / object_name, overwrite=True)
 
     # Save just wavelength + flux
     onedspec.save_csv(stype='science', spec_id=0, output='wavelength+flux',
@@ -230,6 +232,58 @@ def save_final_spectra(onedspec, object_name, output_dir):
 def plot_final_spectrum(csv_path):
     plot_csv_final_spectrum(csv_path, scale='linear')
     plot_csv_final_spectrum(csv_path, scale='log')
+
+def interactive_trim(image, save_path="config_files/trim_bounds.json"):
+    fig, ax = plt.subplots()
+    ax.imshow(image, cmap='jet', origin='lower', aspect='auto', norm=LogNorm())
+    ax.set_title("Select trimming region (this will overwrite the default)")
+
+    coords = {}
+
+    def onselect(eclick, erelease):
+        x1, y1 = int(eclick.xdata), int(eclick.ydata)
+        x2, y2 = int(erelease.xdata), int(erelease.ydata)
+        coords['x_min'] = min(x1, x2)
+        coords['x_max'] = max(x1, x2)
+        coords['y_min'] = min(y1, y2)
+        coords['y_max'] = max(y1, y2)
+        print(f"Selected: {coords}")
+
+    toggle_selector = RectangleSelector(
+        ax, onselect,
+        useblit=True,
+        button=[1],
+        minspanx=5, minspany=5,
+        spancoords='pixels',
+        interactive=True,
+    )
+
+    plt.show()
+
+    save = input("Save this as the new default trimming region? (y/n): ").lower()
+    if save == 'y':
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        with open(save_path, 'w') as f:
+            json.dump(coords, f, indent=4)
+        print(f"Default trimming parameters saved to {save_path}")
+
+    return coords
+
+def apply_trim(image, config_file="config_files/trim_bounds.json"):
+    if not Path(config_file).exists():
+        raise FileNotFoundError(f"Trimming configuration file not found: {config_file}")
+
+    with open(config_file, 'r') as f:
+        bounds = json.load(f)
+
+    required_keys = {'x_min', 'x_max', 'y_min', 'y_max'}
+    if not required_keys.issubset(bounds):
+        raise ValueError("Trim bounds in config file are incomplete or corrupted.")
+
+    x_min, x_max = bounds['x_min'], bounds['x_max']
+    y_min, y_max = bounds['y_min'], bounds['y_max']
+    trimmed = image[y_min:y_max, x_min:x_max]
+    return trimmed, bounds
 
 
 pio.renderers.default = "browser"
@@ -267,20 +321,22 @@ create_aspired_filelists(bias_folder, flats_folder, science_file, arc_file, std_
 reduce_images_with_aspired(object_name.replace(" ", ""), output_directory=output_dir)
 
 '''3 - Trimming and Cosmic Ray Removal'''
-# Trimming Spectra - Implement gui selection eventually
-x_min = 184;
-x_max = 1984;
-y_min = 50; #34
-y_max = 94; #94
+# Trimming Spectra
+trim_config_file = "config_files/trim_bounds.json"
 
 # Read in Image Reduced Data
 sci_image_reduced,_ = extract_data(output_dir/f"{object_name.replace(' ', '')}_science_image_reduced.fits")
 std_image_reduced,_ = extract_data(output_dir/f"{object_name.replace(' ', '')}_standard_image_reduced.fits")
 
-# Trim images
-trimmed_sci = trim_image(sci_image_reduced, x_min, x_max, y_min, y_max)
-trimmed_arc = trim_image(arc_data, x_min, x_max, y_min, y_max)
-trimmed_std = trim_image(std_image_reduced, x_min, x_max, y_min, y_max)
+
+# Trim images with GUI
+coords = interactive_trim(sci_image_reduced)
+
+# Trim images:
+trimmed_sci, _ = apply_trim(sci_image_reduced, trim_config_file)
+trimmed_arc, _ = apply_trim(arc_data, trim_config_file)
+trimmed_std, _ = apply_trim(std_image_reduced, trim_config_file)
+
 
 # Cosmic Ray Removal
 cleaned_sci = clean_cosmic_rays(trimmed_sci)
@@ -297,9 +353,8 @@ std2d = extract_twodspec(cleaned_std, cleaned_arc, std_hdr, is_standard=True)
 
 '''5 - Wavelength Calibration with ARC Lamp'''
 atlas = [4158.59, 4200.67, 4277.53, 4609.57, 4764.86, 4879.86, 6032.127, 6965.43, 7067.21, 7272.94, 7383.9, 7503.87,
-         7635.11, 7948.18, 8014.79, 8115.31, 8264.52, 8521.44, 9122.97, 9224.50] #Grating 7
-element = ['CuAr']*len(atlas)
-onedspec = wavelength_calibration(sci2d, std2d, atlas, element)
+             7635.11, 7948.18, 8014.79, 8115.31, 8264.52, 8521.44, 9122.97, 9224.50]  # Grating 7
+onedspec = wavelength_calibration(sci2d, std2d, atlas)
 
 '''6 - Flux Calibration'''
 perform_flux_calibration(onedspec, standard_name='hilt600')
