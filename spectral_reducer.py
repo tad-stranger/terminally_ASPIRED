@@ -8,7 +8,6 @@ from astroscrappy import detect_cosmics
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
-import lineid_plot
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
@@ -21,8 +20,8 @@ class SpectralReductionPipeline:
         self.obs_base = self.science_path.parents[2]
 
         # BIASS and FLATS directories are at the same level
-        self.bias_folder = self.obs_base / "BIASS"
-        self.flats_folder = self.obs_base / "FLATS"
+        self.bias_folder = self.obs_base / "BIAS"
+        self.flats_folder = self.obs_base / "FLAT"
 
         self.config = self._load_config(config_path)
 
@@ -185,14 +184,86 @@ class SpectralReductionPipeline:
 
 
     def plot_final_spectrum(self):
+        # Load data
         path = self.output_dir / f"{self.object_name}_final.csv"
-        data = pd.read_csv(path, sep = ' ')
-        wav, flux = data.iloc[:, 0], data.iloc[:, 1]
-        plt.plot(wav, flux, label="Final Spectrum")
-        plt.xlabel("Wavelength (Å)")
-        plt.ylabel("Flux (arb)")
+        data = pd.read_csv(path, sep=' ')
+        wav, flux = data.iloc[:, 0] /10, data.iloc[:, 1]
+
+        # Define the line wavelengths and names
+        lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 440]
+        line_names = ['H-α', 'H-β', 'H-γ', 'H-δ', 'H-ζ', 'H-η', 'He I', 'He II']
+
+        # Plot the spectrum
+        plt.figure(figsize=(12, 6))
+        plt.plot(wav, flux, color='black', linewidth=0.75, label='Final Spectrum')
+        plt.yscale('log')
+        plt.xlabel("Wavelength (nm)", fontsize=12)
+        plt.ylabel("Flux (arb)", fontsize=12)
+
+        # Plot vertical lines and labels
+        for line_wav, name in zip(lines, line_names):
+            if wav.min() < line_wav < wav.max():
+                # Find nearest index for labeling height
+                idx = (np.abs(wav - line_wav)).argmin()
+                y = flux.iloc[idx]
+                plt.axvline(line_wav, color='blue', linestyle='--', alpha=0.5)
+                plt.text(line_wav + 2, y * 1.2, name, color='blue', fontsize=9, rotation=90, ha='left', va='bottom')
+
+        plt.title(f"Final Spectrum: {self.object_name}", fontsize=14)
+        plt.tight_layout()
         plt.legend()
         plt.show()
+
+    def interactive_trim(self, tag="science"):
+
+        # Load and display image
+        data = self._load_image(tag)
+        fig, ax = plt.subplots()
+        ax.imshow(data, cmap='jet', origin='lower', aspect='auto', norm=LogNorm())
+        ax.set_title(f"Select trimming region for {tag} image")
+
+        coords = {}
+
+        def onselect(eclick, erelease):
+            x1, y1 = int(eclick.xdata), int(eclick.ydata)
+            x2, y2 = int(erelease.xdata), int(erelease.ydata)
+            coords.update({
+                'x_min': min(x1, x2),
+                'x_max': max(x1, x2),
+                'y_min': min(y1, y2),
+                'y_max': max(y1, y2)
+            })
+            print(f"\nSelected region:\n{json.dumps(coords, indent=4)}")
+
+        selector = RectangleSelector(
+            ax, onselect,
+            useblit=True,
+            button=[1],
+            minspanx=5, minspany=5,
+            spancoords='pixels',
+            interactive=True
+        )
+
+        plt.show()
+
+        if not coords:
+            print("No region selected. Aborting trim update.")
+            return
+
+        save = input("Save this region as the new default trimming bounds? (y/n): ").strip().lower()
+        if save == 'y':
+            self.config["trim_bounds"] = coords
+            save_path = "config_files/trim_bounds.json"
+            Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+            with open(save_path, 'w') as f:
+                json.dump(coords, f, indent=4)
+            print(f"New trimming bounds saved to {save_path}")
+        else:
+            print("New trimming bounds not saved. Using for current session only.")
+
+        # Update in-memory config regardless
+        self.config["trim_bounds"] = coords
+
 
     def run(self):
         self.extract_data()
@@ -204,6 +275,3 @@ class SpectralReductionPipeline:
         self.calibrate_flux()
         self.save_final_spectrum()
         self.plot_final_spectrum()
-
-
-
