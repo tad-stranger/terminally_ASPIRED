@@ -11,7 +11,7 @@ from matplotlib.widgets import RectangleSelector
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, config_path="config_files/defaults.json"):
+    def __init__(self, science_file, arc_file, std_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
@@ -19,9 +19,12 @@ class SpectralReductionPipeline:
         # Deduce base observation directory (e.g., ".../0503")
         self.obs_base = self.science_path.parents[2]
 
-        # BIASS and FLATS directories are at the same level
-        self.bias_folder = self.obs_base / "BIAS"
-        self.flats_folder = self.obs_base / "FLAT"
+        if use_bias_flats and bias_path and flat_path:
+            self.bias_folder = Path(bias_path)
+            self.flat_folder = Path(flat_path)
+        else:
+            self.bias_folder = Path("DO_NOT_USE_BIAS")
+            self.flat_folder = Path("DO_NOT_USE_FLATS")
 
         self.config = self._load_config(config_path)
 
@@ -62,7 +65,7 @@ class SpectralReductionPipeline:
     def write_filelists(self):
         def write(filelist_path, science_file):
             bias_files = sorted(self.bias_folder.glob("*.fits"))
-            flat_files = sorted(self.flats_folder.glob("*.fits"))
+            flat_files = sorted(self.flat_folder.glob("*.fits"))
             with open(filelist_path, "w") as f:
                 for file in bias_files:
                     f.write(f"bias, {file.resolve()}\n")
@@ -136,14 +139,38 @@ class SpectralReductionPipeline:
 
         atlas = self.config["atlas_lines"]
         element = ["CuAr"] * len(atlas)
+        cal_cfg = self.config["wavelength_cal"]
 
-        self.onedspec.find_arc_lines(prominence=7, refine=True, display=True, stype='science+standard')
+        self.onedspec.find_arc_lines(
+            prominence=cal_cfg["prominence"],
+            refine=cal_cfg["refine"],
+            display=True,
+            stype='science+standard'
+        )
+
         self.onedspec.initialise_calibrator(stype='science+standard')
-        self.onedspec.add_user_atlas(elements=element, wavelengths=atlas, stype='science+standard')
+        self.onedspec.add_user_atlas(
+            elements=element,
+            wavelengths=atlas,
+            stype='science+standard'
+        )
+
         self.onedspec.set_hough_properties(**self.config["hough"])
+
         self.onedspec.do_hough_transform(stype='science+standard')
-        self.onedspec.set_ransac_properties(minimum_matches=10)
-        self.onedspec.fit(max_tries=1000, fit_deg=3, fit_type='poly', display=True, stype='science+standard')
+
+        self.onedspec.set_ransac_properties(
+            minimum_matches=cal_cfg["ransac_minimum_matches"]
+        )
+
+        self.onedspec.fit(
+            max_tries=cal_cfg["fit_max_tries"],
+            fit_deg=cal_cfg["fit_deg"],
+            fit_type=cal_cfg["fit_type"],
+            display=True,
+            stype='science+standard'
+        )
+
         self.onedspec.apply_wavelength_calibration(stype='science+standard')
 
     def calibrate_flux(self):
@@ -215,28 +242,64 @@ class SpectralReductionPipeline:
         plt.show()
 
     def interactive_trim(self, tag="science"):
+        data = self._load_image(tag)  # 2D reduced science image
+        arc = self.arc_data  # Raw or reduced arc frame (should already be flipped and loaded)
 
-        # Load and display image
-        data = self._load_image(tag)
-        fig, ax = plt.subplots()
-        ax.imshow(data, cmap='jet', origin='lower', aspect='auto', norm=LogNorm())
-        ax.set_title(f"Select trimming region for {tag} image")
+        fig, (ax2d, ax1d_sci, ax1d_arc) = plt.subplots(
+            3, 1, figsize=(10, 10), gridspec_kw={'height_ratios': [3, 1, 1]}
+        )
+
+        ax2d.imshow(data, cmap='jet', origin='lower', aspect='auto', norm=LogNorm())
+        ax2d.set_title(f"Select trimming region for {tag} image")
+        ax1d_sci.set_title("1D Science Spectrum (sum over spatial axis)")
+        ax1d_arc.set_title("1D Arc Spectrum (sum over spatial axis)")
 
         coords = {}
+
+        def update_1d_plots(x1, x2, y1, y2):
+            # Ensure trimming stays within bounds
+            x1, x2 = np.clip([x1, x2], 0, data.shape[1] - 1)
+            y1, y2 = np.clip([y1, y2], 0, data.shape[0] - 1)
+
+            # Trim regions
+            sci_sub = data[y1:y2, x1:x2]
+            arc_sub = arc[y1:y2, x1:x2]
+
+            # Clear previous plots
+            ax1d_sci.cla()
+            ax1d_arc.cla()
+
+            if sci_sub.size > 0:
+                sci_1d = np.sum(sci_sub, axis=0)
+                ax1d_sci.plot(sci_1d, color='black')
+                ax1d_sci.set_xlim(0, sci_1d.size)
+
+            if arc_sub.size > 0:
+                arc_1d = np.sum(arc_sub, axis=0)
+                ax1d_arc.plot(arc_1d, color='black')
+                ax1d_arc.set_xlim(0, arc_1d.size)
+
+            fig.canvas.draw_idle()
 
         def onselect(eclick, erelease):
             x1, y1 = int(eclick.xdata), int(eclick.ydata)
             x2, y2 = int(erelease.xdata), int(erelease.ydata)
+
+            x_min, x_max = sorted((x1, x2))
+            y_min, y_max = sorted((y1, y2))
+
             coords.update({
-                'x_min': min(x1, x2),
-                'x_max': max(x1, x2),
-                'y_min': min(y1, y2),
-                'y_max': max(y1, y2)
+                'x_min': x_min,
+                'x_max': x_max,
+                'y_min': y_min,
+                'y_max': y_max
             })
+
             print(f"\nSelected region:\n{json.dumps(coords, indent=4)}")
+            update_1d_plots(x_min, x_max, y_min, y_max)
 
         selector = RectangleSelector(
-            ax, onselect,
+            ax2d, onselect,
             useblit=True,
             button=[1],
             minspanx=5, minspany=5,
@@ -244,6 +307,7 @@ class SpectralReductionPipeline:
             interactive=True
         )
 
+        #plt.tight_layout()
         plt.show()
 
         if not coords:
@@ -261,14 +325,25 @@ class SpectralReductionPipeline:
         else:
             print("New trimming bounds not saved. Using for current session only.")
 
-        # Update in-memory config regardless
+        # Always update in-memory config
         self.config["trim_bounds"] = coords
-
 
     def run(self):
         self.extract_data()
         self.write_filelists()
         self.reduce_images()
+        self.trim_and_clean()
+        self.extract_2dspec()
+        self.calibrate_wavelength()
+        self.calibrate_flux()
+        self.save_final_spectrum()
+        self.plot_final_spectrum()
+
+    def run_with_interactive_trim(self, tag = "science"):
+        self.extract_data()
+        self.write_filelists()
+        self.reduce_images()
+        self.interactive_trim(tag=tag)
         self.trim_and_clean()
         self.extract_2dspec()
         self.calibrate_wavelength()
