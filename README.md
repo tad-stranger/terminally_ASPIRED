@@ -1,6 +1,6 @@
 # terminally_ASPIRED 🔭
 
-**A customizable Python pipeline for reducing 1D spectra from the SAAO 1.9m telescope using the [ASPIRED](https://github.com/cylammarco/ASPIRED) library.**
+**A customizable Python pipeline for reducing spectra from the SAAO 1.9m telescope using the [ASPIRED](https://github.com/cylammarco/ASPIRED) library.**
 
 ---
 
