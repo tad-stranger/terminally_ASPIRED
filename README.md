@@ -19,3 +19,6 @@
 ## 📦 Installation
 
 We recommend using a virtual environment:
+```bash
+conda env create -f environment.yml
+conda activate terminally_ASPIRED
