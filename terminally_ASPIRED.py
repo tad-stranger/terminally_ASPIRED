@@ -18,6 +18,7 @@ def main():
     parser.add_argument("--bias_path", type = str, help = "Path to bias frames")
     parser.add_argument("--flat_path", type = str, help = "Path to flat frames")
     parser.add_argument("--interactive_trim", action = "store_true", help = "Enables interactive trim of science images")
+    parser.add_argument("--show_plots", action = "store_true", help = "Enables plotting of intermediate ASPIRED images")
 
     args = parser.parse_args()
 
@@ -28,7 +29,8 @@ def main():
                                          config_path=args.config,
                                          use_bias_flats=args.use_bias_flats,
                                          bias_path=args.bias_path,
-                                         flat_path=args.flat_path)
+                                         flat_path=args.flat_path,
+                                         show_plots=args.show_plots)
 
     if args.interactive_trim:
         pipeline.run_with_interactive_trim()
