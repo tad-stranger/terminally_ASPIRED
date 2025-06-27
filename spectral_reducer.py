@@ -11,7 +11,7 @@ from matplotlib.widgets import RectangleSelector
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None):
+    def __init__(self, science_file, arc_file, std_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None, show_plots = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
@@ -27,6 +27,9 @@ class SpectralReductionPipeline:
             self.flat_folder = Path("DO_NOT_USE_FLATS")
 
         self.config = self._load_config(config_path)
+
+        self.show_plots = show_plots
+        self.config["display_plots"] = show_plots
 
         # Placeholder attributes
         self.object_name = None
@@ -126,8 +129,18 @@ class SpectralReductionPipeline:
     def _extract_twodspec(self, data, arc, header, is_standard):
         twod = spectral_reduction.TwoDSpec(data, header=header, cosmicray=False)
         twod.set_properties(saxis=1, flip=False, cosmicray=False)
-        twod.ap_trace(**self.config["trace_kwargs"]["standard" if is_standard else "science"])
-        twod.ap_extract(**self.config["extract_kwargs"]["standard" if is_standard else "science"])
+
+        trace_key = "standard" if is_standard else "science"
+        trace_kwargs = self.config["trace_kwargs"][trace_key].copy()
+        extract_kwargs = self.config["extract_kwargs"][trace_key].copy()
+
+        # Inject display flag
+        trace_kwargs["display"] = self.config.get("display_plots", False)
+        extract_kwargs["display"] = self.config.get("display_plots", False)
+
+        twod.ap_trace(**trace_kwargs)
+        twod.ap_extract(**extract_kwargs)
+
         twod.add_arc(arc=arc)
         twod.extract_arc_spec()
         return twod
@@ -144,7 +157,7 @@ class SpectralReductionPipeline:
         self.onedspec.find_arc_lines(
             prominence=cal_cfg["prominence"],
             refine=cal_cfg["refine"],
-            display=True,
+            display=self.config["display_plots"],
             stype='science+standard'
         )
 
@@ -167,7 +180,7 @@ class SpectralReductionPipeline:
             max_tries=cal_cfg["fit_max_tries"],
             fit_deg=cal_cfg["fit_deg"],
             fit_type=cal_cfg["fit_type"],
-            display=True,
+            display=self.config["display_plots"],
             stype='science+standard'
         )
 
@@ -176,9 +189,11 @@ class SpectralReductionPipeline:
     def calibrate_flux(self):
         std_name = self.config.get("standard_name", "hilt600")
         self.onedspec.load_standard(target=std_name)
-        self.onedspec.inspect_standard()
+        if self.config["display_plots"]:
+            self.onedspec.inspect_standard()
         self.onedspec.get_sensitivity()
-        self.onedspec.inspect_sensitivity()
+        if self.config["display_plots"]:
+            self.onedspec.inspect_sensitivity()
         self.onedspec.apply_flux_calibration()
 
     def save_final_spectrum(self):
@@ -307,7 +322,7 @@ class SpectralReductionPipeline:
             interactive=True
         )
 
-        #plt.tight_layout()
+        plt.tight_layout()
         plt.show()
 
         if not coords:

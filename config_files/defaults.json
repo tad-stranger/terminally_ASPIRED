@@ -5,6 +5,9 @@
     "y_min": 50,
     "y_max": 94
   },
+
+  "display_plots": false,
+
   "cosmic_ray": {
     "sigclip": 4.5,
     "sigfrac": 0.3,
@@ -16,7 +19,7 @@
   "trace_kwargs": {
     "science": {
       "nspec": 1, "nwindow": 100, "trace_width": 5,
-      "resample_factor": 15, "fit_deg": 3, "display": true,
+      "resample_factor": 15, "fit_deg": 3, "display": false,
       "width": 1024, "height": 1024
     },
     "standard": {
@@ -28,7 +31,7 @@
   "extract_kwargs": {
     "science": {
       "apwidth": 3, "optimal": true, "algorithm": "marsh89",
-      "skysep": 2, "skywidth": 5, "skydeg": 1, "display": true
+      "skysep": 2, "skywidth": 5, "skydeg": 1, "display": false
     },
     "standard": {
       "apwidth": 5, "optimal": true, "algorithm": "marsh89",
