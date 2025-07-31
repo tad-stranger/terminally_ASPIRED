@@ -18,7 +18,7 @@ def main():
     parser.add_argument("-f", "--flat-field", type = str, default="", help = "Path to flat directory skip on empty")
     parser.add_argument("--interactive_trim", action = "store_true", help = "Enables interactive trim of science images")
     parser.add_argument("--show_plots", action = "store_true", help = "Enables plotting of intermediate ASPIRED images")
-
+    parser.add_argument("-s", "--smooth", type = int, default=1, help = "Box smoothing by n points applied to final spectrum")
     args = parser.parse_args()
 
     # Run Pipeline
@@ -28,7 +28,8 @@ def main():
                                          config_path=args.config,
                                          bias_path=args.bias,
                                          flat_path=args.flat_field,
-                                         show_plots=args.show_plots)
+                                         show_plots=args.show_plots,
+                                         smooth=args.smooth)
 
     if args.interactive_trim:
         pipeline.run_with_interactive_trim()
