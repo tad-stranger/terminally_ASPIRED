@@ -8,13 +8,15 @@ from astroscrappy import detect_cosmics
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
+from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None, show_plots = False):
+    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None, show_plots = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
+        self.arc_std_path = Path(std_arc_file)
 
         # Deduce base observation directory (e.g., ".../0503")
         self.obs_base = self.science_path.parents[2]
@@ -43,6 +45,7 @@ class SpectralReductionPipeline:
         self.sci_data = None
         self.arc_data = None
         self.std_data = None
+        self.arc_std_data = None
         self.hdr_sci = None
         self.hdr_arc = None
         self.hdr_std = None
@@ -59,10 +62,12 @@ class SpectralReductionPipeline:
         sci_path = self.science_path
         arc_path = self.arc_path
         std_path = self.std_path
+        arc_std_path = self.arc_std_path
 
         self.sci_data, self.hdr_sci = _extract(sci_path)
         self.arc_data, self.hdr_arc = _extract(arc_path)
         self.std_data, self.hdr_std = _extract(std_path)
+        self.arc_std_data, self.hdr_arc_std = _extract(arc_std_path)
 
         self.object_name = self.hdr_sci.get("OBJECT", "Unknown").replace(" ", "")
         self.output_dir = Path(f"./ReducedSpectra/{self.object_name}")
@@ -120,6 +125,7 @@ class SpectralReductionPipeline:
         self.cleaned["sci"] = clean(trim(self._load_image("science")))
         self.cleaned["arc"] = clean(trim(self.arc_data))
         self.cleaned["std"] = clean(trim(self._load_image("standard")))
+        self.cleaned["arc_std"] = clean(trim(self.arc_std_data))
 
     def _load_image(self, tag):
         data, _ = fits.getdata(self.output_dir / f"{self.object_name}_{tag}_image_reduced.fits", header=True)
@@ -127,7 +133,7 @@ class SpectralReductionPipeline:
 
     def extract_2dspec(self):
         self.sci2d = self._extract_twodspec(self.cleaned["sci"], self.cleaned["arc"], self.hdr_sci, is_standard=False)
-        self.std2d = self._extract_twodspec(self.cleaned["std"], self.cleaned["arc"], self.hdr_std, is_standard=True)
+        self.std2d = self._extract_twodspec(self.cleaned["std"], self.cleaned["arc_std"], self.hdr_std, is_standard=True)
 
     def _extract_twodspec(self, data, arc, header, is_standard):
         twod = spectral_reduction.TwoDSpec(data, header=header, cosmicray=False)
@@ -153,18 +159,26 @@ class SpectralReductionPipeline:
         self.onedspec.from_twodspec(self.sci2d, stype="science")
         self.onedspec.from_twodspec(self.std2d, stype="standard")
 
+        cal_cfg = self.config["wavelength_cal"]
         atlas = self.config["atlas_lines"]
         element = ["CuAr"] * len(atlas)
-        cal_cfg = self.config["wavelength_cal"]
 
         self.onedspec.find_arc_lines(
-            prominence=cal_cfg["prominence"],
-            refine=cal_cfg["refine"],
+            prominence=cal_cfg["science"]["prominence"],
+            refine=cal_cfg["science"]["refine"],
             display=self.config["display_plots"],
-            stype='science+standard'
+            stype='science'
         )
 
-        self.onedspec.initialise_calibrator(stype='science+standard')
+        self.onedspec.find_arc_lines(
+            prominence=cal_cfg["standard"]["prominence"],
+            refine=cal_cfg["standard"]["refine"],
+            display=self.config["display_plots"],
+            stype='standard'
+        )
+
+        self.onedspec.initialise_calibrator(stype ='science+standard')
+
         self.onedspec.add_user_atlas(
             elements=element,
             wavelengths=atlas,
@@ -175,22 +189,39 @@ class SpectralReductionPipeline:
 
         self.onedspec.do_hough_transform(stype='science+standard')
 
+        self.onedspec.verbose = True
+
         self.onedspec.set_ransac_properties(
-            minimum_matches=cal_cfg["ransac_minimum_matches"]
+            minimum_matches=cal_cfg["science"]["ransac_minimum_matches"],
+            stype="science"
+        )
+
+        self.onedspec.set_ransac_properties(
+            minimum_matches=cal_cfg["standard"]["ransac_minimum_matches"],
+            stype="standard"
         )
 
         self.onedspec.fit(
-            max_tries=cal_cfg["fit_max_tries"],
-            fit_deg=cal_cfg["fit_deg"],
-            fit_type=cal_cfg["fit_type"],
+            max_tries=cal_cfg["science"]["fit_max_tries"],
+            fit_deg=cal_cfg["science"]["fit_deg"],
+            fit_type=cal_cfg["science"]["fit_type"],
             display=self.config["display_plots"],
-            stype='science+standard'
+            stype='science'
         )
 
-        self.onedspec.apply_wavelength_calibration(stype='science+standard')
+        self.onedspec.fit(
+            max_tries=cal_cfg["standard"]["fit_max_tries"],
+            fit_deg=cal_cfg["standard"]["fit_deg"],
+            fit_type=cal_cfg["standard"]["fit_type"],
+            display=self.config["display_plots"],
+            stype='standard'
+        )
+
+        self.onedspec.apply_wavelength_calibration(stype='science')
+        self.onedspec.apply_wavelength_calibration(stype='standard')
 
     def calibrate_flux(self):
-        std_name = self.config.get("standard_name", "hilt600")
+        std_name = self.config.get("standard_name")
         self.onedspec.load_standard(target=std_name)
         if self.config["display_plots"]:
             self.onedspec.inspect_standard()
@@ -235,7 +266,7 @@ class SpectralReductionPipeline:
         wav, flux = data.iloc[:, 0] /10, data.iloc[:, 1]
 
         # Define the line wavelengths and names
-        lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 440]
+        lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 468.6]
         line_names = ['H-α', 'H-β', 'H-γ', 'H-δ', 'H-ζ', 'H-η', 'He I', 'He II']
 
         # Plot the spectrum
@@ -257,6 +288,7 @@ class SpectralReductionPipeline:
         plt.title(f"Final Spectrum: {self.object_name}", fontsize=14)
         plt.tight_layout()
         plt.legend()
+        plt.savefig(self.output_dir / f"{self.object_name}_log_plot.png", dpi=300)
         plt.show()
 
     def interactive_trim(self, tag="science"):
@@ -345,6 +377,7 @@ class SpectralReductionPipeline:
 
         # Always update in-memory config
         self.config["trim_bounds"] = coords
+
 
     def run(self):
         self.extract_data()
