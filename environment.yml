@@ -65,7 +65,7 @@ dependencies:
       - asdf-standard==1.1.1
       - asdf-transform-schemas==0.5.0
       - asdf-wcs-schemas==0.4.0
-      - aspired==0.5.1
+      - git+https://github.com/LloydLandsberg/ASPIRED_74in.git
       - astropy==7.0.1
       - astropy-healpix==1.1.2
       - astropy-iers-data==0.2025.3.24.0.35.32
@@ -98,7 +98,7 @@ dependencies:
       - plotly==6.0.1
       - pynverse==0.1.4.6
       - pytz==2025.2
-      - rascal==0.3.8.1
+      - git+https://github.com/LloydLandsberg/rascal_fork.git
       - reproject==0.14.1
       - scikit-image==0.25.2
       - semantic-version==2.10.0

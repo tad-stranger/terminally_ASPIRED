@@ -34,34 +34,6 @@ We recommend using a virtual environment:
 conda env create -f environment.yml
 conda activate terminally_ASPIRED
 ```
-### Step 3: Modify ASPIRED
-A few manual tweaks to the ASPIRED source code are currently required for full compatibility. These should be applied after installing ASPIRED within the virtual environment:
-
-###  📂 `aspired/spectrum_oneD.py`
-
-> Full path depends on your conda installation, Typically:
-> `~/miniconda3/envs/terminally_ASPIRED/lib/python3.10/site-packages/aspired/spectrum_oneD.py`
-
-- **Comment out line 1307**:
-```python
-  # assert np.isfinite(seeing), "airmass has to be finite."
-  ```
-- **Replace lines 1283 and 1284 with:** 
-```python
-assert np.isfinite(float(airmass)), "airmass has to be finite."
-self.airmass = float(airmass)
-```
-### 📂 `rascal/calibrator.py`
-> Path: `.../site-packages/rascal/calibrator.py`
-- **Replace line 1545**:
-```python
-if self.pairs == []:
-```
-with:
-```python
-if self.pairs.size == 0:
-```
----
 ## ⚙️ Configuration: `defaults.json`
 This file controls all pipeline behaviour.
 Key sections include:

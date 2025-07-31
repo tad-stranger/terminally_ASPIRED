@@ -289,10 +289,10 @@ def apply_trim(image, config_file="config_files/trim_bounds.json"):
 pio.renderers.default = "browser"
 
 # Set Observation Path
-observations_path = "Transients Observations/0503/"
-science_file_name = "Gaia3513/a6281106.fits"
-arc_file_name = "a6281115.fits"
-std_file_name = "HILT600/a6281069.fits"
+observations_path = "example/SN2024xuo/"
+science_file_name = "SN2024xuo_science.fits"
+arc_file_name = "arc.fits"
+std_file_name = "HILT600_science.fits"
 
 bias_folder = f"{observations_path}BIASS"
 flats_folder = f"{observations_path}FLATS"
