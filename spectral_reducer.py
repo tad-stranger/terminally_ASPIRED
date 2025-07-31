@@ -11,7 +11,7 @@ from matplotlib.widgets import RectangleSelector
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None, show_plots = False):
+    def __init__(self, science_file, arc_file, std_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None, show_plots = False, smooth=1):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
@@ -47,6 +47,8 @@ class SpectralReductionPipeline:
         self.hdr_arc = None
         self.hdr_std = None
 
+        # Smoothing value
+        self.smooth = smooth
     def _load_config(self, path):
         with open(path, 'r') as f:
             return json.load(f)
