@@ -19,12 +19,15 @@ class SpectralReductionPipeline:
         # Deduce base observation directory (e.g., ".../0503")
         self.obs_base = self.science_path.parents[2]
 
-        if use_bias_flats and bias_path and flat_path:
-            self.bias_folder = Path(bias_path)
-            self.flat_folder = Path(flat_path)
-        else:
+        if bias_path == "":
             self.bias_folder = Path("DO_NOT_USE_BIAS")
+        else:
+            self.bias_folder = Path(bias_path)
+
+        if flat_path == "":
             self.flat_folder = Path("DO_NOT_USE_FLATS")
+        else:
+            self.flat_folder = Path(flat_path)
 
         self.config = self._load_config(config_path)
 
