@@ -14,8 +14,8 @@ def main():
                         default = "config_files/defaults.json",
                         help = "Path to config JSON file (default: config_files/defaults.json)"
                         )
-    parser.add_argument("-b", "--bias", type = str, help = "Path to bias frame skip on empty")
-    parser.add_argument("-f", "--flat-field", type = str, help = "Path to flat frame skip on empty")
+    parser.add_argument("-b", "--bias", type = str, default="", help = "Path to bias directory skip on empty")
+    parser.add_argument("-f", "--flat-field", type = str, default="", help = "Path to flat directory skip on empty")
     parser.add_argument("--interactive_trim", action = "store_true", help = "Enables interactive trim of science images")
     parser.add_argument("--show_plots", action = "store_true", help = "Enables plotting of intermediate ASPIRED images")
 
