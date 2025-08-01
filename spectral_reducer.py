@@ -15,12 +15,12 @@ from tkinter import Tk, Label, Entry, Button
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
                  bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False, no_warnings = True,
-                 output_dir_name = None):
+                 output_dir_name = None, sky = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
         self.arc_std_path = Path(std_arc_file)
-
+        self.show_sky = sky
         self.smoothing_value = smooth
         self.verbose = verbose
         # Deduce base observation directory (e.g., ".../0503")
@@ -261,12 +261,12 @@ class SpectralReductionPipeline:
         wav = pd.read_csv(wav_path, skiprows=1, names=['wav'])
         flux = pd.read_csv(flux_path, skiprows=1, names=['flux', 'uflux', 'sky'])
 
-        merged = pd.concat([wav, flux['flux']], axis=1)
+        merged = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
         merged.to_csv(output_dir / f"{object_name}.csv", header=True, index=False)
 
         # SNID-style space-separated output
         snid_path = output_dir / f"{object_name}_final.csv"
-        snid_file = pd.concat([wav, flux['flux']], axis=1)
+        snid_file = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
         snid_file.to_csv(snid_path, sep=' ', header=True, index=False)
 
 
@@ -274,7 +274,7 @@ class SpectralReductionPipeline:
         # Load data
         path = self.output_dir / f"{self.object_name}_final.csv"
         data = pd.read_csv(path, sep=' ')
-        wav, flux = data.iloc[:, 0] /10, data.iloc[:, 1]
+        wav, flux, sky = data.iloc[:, 0] /10, data.iloc[:, 1], data.iloc[:, 2]
 
         # Define the line wavelengths and names
         lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 468.6]
@@ -283,6 +283,8 @@ class SpectralReductionPipeline:
         # Plot the spectrum
         plt.figure(figsize=(12, 6))
         plt.plot(wav, flux, color='black', linewidth=0.75, label='Final Spectrum')
+        if self.show_sky:
+            plt.plot(wav, sky, color='red', label='Sky Flux')
         plt.yscale('log')
         plt.xlabel("Wavelength (nm)", fontsize=12)
         plt.ylabel("Flux (arb)", fontsize=12)

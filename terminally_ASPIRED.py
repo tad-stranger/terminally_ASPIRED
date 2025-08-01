@@ -26,6 +26,7 @@ def main():
     parser.add_argument("-v", "--verbose",action = "store_true", help = "Enables verbose mode")
     parser.add_argument("--no-warnings", action = "store_true", help = "Disables warnings")
     parser.add_argument("-O", "--output-dir",type= str, default= None, help="Specify output directory name. Default is object name from fits header")
+    parser.add_argument("--show-sky", action="store_true", help = "Show sky flux on final image")
     args = parser.parse_args()
 
     # Run Pipeline
@@ -40,7 +41,8 @@ def main():
                                          smooth=args.smooth,
                                          verbose=args.verbose,
                                          no_warnings=args.no_warnings,
-                                         output_dir_name=args.output_dir)
+                                         output_dir_name=args.output_dir,
+                                         sky=args.show_sky)
 
     if args.interactive_trim:
         pipeline.run_with_interactive_trim()
