@@ -14,7 +14,8 @@ from tkinter import Tk, Label, Entry, Button
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
-                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False, no_warnings = True):
+                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False, no_warnings = True,
+                 output_dir_name = None):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
@@ -43,7 +44,7 @@ class SpectralReductionPipeline:
 
         # Placeholder attributes
         self.object_name = None
-        self.output_dir = None
+        self.output_dir = output_dir_name
         self.cleaned = {}
 
         # FITS data
@@ -75,7 +76,10 @@ class SpectralReductionPipeline:
         self.arc_std_data, self.hdr_arc_std = _extract(arc_std_path)
 
         self.object_name = self.hdr_sci.get("OBJECT", "Unknown").replace(" ", "")
-        self.output_dir = Path(f"./ReducedSpectra/{self.object_name}")
+        if self.output_dir is None:
+            self.output_dir = Path(f"./ReducedSpectra/{self.object_name}")
+        else:
+            self.output_dir = Path(f"./ReducedSpectra/{self.output_dir}")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def write_filelists(self):

@@ -25,6 +25,7 @@ def main():
     parser.add_argument("-s", "--smooth", type = int, default=1, help = "Box smoothing by n points applied to final spectrum plot")
     parser.add_argument("-v", "--verbose",action = "store_true", help = "Enables verbose mode")
     parser.add_argument("--no-warnings", action = "store_true", help = "Disables warnings")
+    parser.add_argument("-O", "--output-dir",type= str, default= None, help="Specify output directory name. Default is object name from fits header")
     args = parser.parse_args()
 
     # Run Pipeline
@@ -38,7 +39,8 @@ def main():
                                          show_plots=args.show_plots,
                                          smooth=args.smooth,
                                          verbose=args.verbose,
-                                         no_warnings=args.no_warnings)
+                                         no_warnings=args.no_warnings,
+                                         output_dir_name=args.output_dir)
 
     if args.interactive_trim:
         pipeline.run_with_interactive_trim()
