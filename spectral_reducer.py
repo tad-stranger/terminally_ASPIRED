@@ -12,14 +12,17 @@ from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", bias_path = None, flat_path = None, show_plots = False, smooth = 1):
+    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
+                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
         self.arc_std_path = Path(std_arc_file)
 
+        self.smoothing_value = smooth
+        self.verbose = verbose
         # Deduce base observation directory (e.g., ".../0503")
-        self.obs_base = self.science_path.parents[2]
+        # self.obs_base = self.science_path.parents[2]
 
         if bias_path == "":
             self.bias_folder = Path("DO_NOT_USE_BIAS")
@@ -100,7 +103,7 @@ class SpectralReductionPipeline:
 
     def reduce_images(self):
         def reduce(list_file, tag):
-            ir = image_reduction.ImageReduction()
+            ir = image_reduction.ImageReduction(verbose=self.verbose)
             ir.add_filelist(str(list_file))
             ir.load_data()
             ir.reduce()
@@ -119,7 +122,7 @@ class SpectralReductionPipeline:
                    ]
 
         def clean(data):
-            _, cleaned = detect_cosmics(data, **self.config["cosmic_ray"])
+            _, cleaned = detect_cosmics(data, **self.config["cosmic_ray"], verbose=self.verbose)
             return cleaned
 
         self.cleaned["sci"] = clean(trim(self._load_image("science")))
@@ -136,8 +139,8 @@ class SpectralReductionPipeline:
         self.std2d = self._extract_twodspec(self.cleaned["std"], self.cleaned["arc_std"], self.hdr_std, is_standard=True)
 
     def _extract_twodspec(self, data, arc, header, is_standard):
-        twod = spectral_reduction.TwoDSpec(data, header=header, cosmicray=False)
-        twod.set_properties(saxis=1, flip=False, cosmicray=False)
+        twod = spectral_reduction.TwoDSpec(data, header=header, cosmicray=False, verbose=self.verbose)
+        twod.set_properties(saxis=1, flip=False, cosmicray=False, verbose=self.verbose)
 
         trace_key = "standard" if is_standard else "science"
         trace_kwargs = self.config["trace_kwargs"][trace_key].copy()
@@ -155,7 +158,7 @@ class SpectralReductionPipeline:
         return twod
 
     def calibrate_wavelength(self):
-        self.onedspec = spectral_reduction.OneDSpec()
+        self.onedspec = spectral_reduction.OneDSpec(verbose=self.verbose)
         self.onedspec.from_twodspec(self.sci2d, stype="science")
         self.onedspec.from_twodspec(self.std2d, stype="standard")
 
