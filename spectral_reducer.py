@@ -271,7 +271,11 @@ class SpectralReductionPipeline:
 
 
     def plot_final_spectrum(self):
-        # Load data
+        def box_smoothing(y_data, box_pts):
+            box = np.ones(box_pts) / box_pts
+            return np.convolve(y_data, box, mode='same')
+
+        # Load y_data
         path = self.output_dir / f"{self.object_name}_final.csv"
         data = pd.read_csv(path, sep=' ')
         wav, flux, sky = data.iloc[:, 0] /10, data.iloc[:, 1], data.iloc[:, 2]
@@ -282,7 +286,7 @@ class SpectralReductionPipeline:
 
         # Plot the spectrum
         plt.figure(figsize=(12, 6))
-        plt.plot(wav, flux, color='black', linewidth=0.75, label='Final Spectrum')
+        plt.plot(wav, box_smoothing(flux, self.smoothing_value), color='black', linewidth=0.75, label='Final Spectrum')
         if self.show_sky:
             plt.plot(wav, sky, color='red', label='Sky Flux')
         plt.yscale('log')
