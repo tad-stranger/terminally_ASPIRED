@@ -238,6 +238,8 @@ class SpectralReductionPipeline:
         if self.config["display_plots"]:
             self.onedspec.inspect_sensitivity()
         self.onedspec.apply_flux_calibration()
+        if self.config["display_plots"]:
+            self.onedspec.inspect_reduced_spectrum()
 
     def save_final_spectrum(self):
         output_dir = self.output_dir
