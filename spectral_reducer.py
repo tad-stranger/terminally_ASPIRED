@@ -12,7 +12,7 @@ from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", use_bias_flats = False, bias_path = None, flat_path = None, show_plots = False):
+    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", bias_path = None, flat_path = None, show_plots = False, smooth = 1):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)

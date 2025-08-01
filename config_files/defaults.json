@@ -13,12 +13,12 @@
     "sigfrac": 0.3,
     "objlim": 5.0
   },
-  "atlas_lines": [4158.59, 4200.67, 4277.53, 4609.57, 4764.86, 4879.86, 6032.127, 6965.43, 7067.21, 7272.94, 7383.9, 7503.87,
-             7635.11, 7948.18, 8014.79, 8115.31, 8264.52, 8521.44, 9122.97, 9224.50],
+  "atlas_lines": [4198.317, 4277.5282, 4764.8646, 6965.43, 7067.2181 ,7383.9805, 7503.87,
+             7635.11, 7724.2072, 8006.1567, 8115.31],
   "standard_name": "hilt600",
   "trace_kwargs": {
     "science": {
-      "nspec": 1, "nwindow": 100, "trace_width": 5,
+      "nspec": 1, "nwindow": 20, "trace_width": 5,
       "resample_factor": 15, "fit_deg": 3, "display": false,
       "width": 1024, "height": 1024
     },
@@ -35,21 +35,31 @@
     },
     "standard": {
       "apwidth": 5, "optimal": true, "algorithm": "marsh89",
-      "skysep": 7, "skywidth": 10, "skydeg": 1, "display": false
+      "skysep": 7, "skywidth": 5, "skydeg": 1, "display": false
     }
   },
   "hough": {
     "num_slopes": 1000, "xbins": 100, "ybins": 100,
     "min_wavelength": 3500, "max_wavelength": 9000,
-    "range_tolerance": 250
+    "range_tolerance": 500
   },
   "wavelength_cal": {
-    "prominence": 7,
-    "refine": true,
-    "ransac_minimum_matches": 10,
-    "fit_max_tries": 1000,
-    "fit_deg": 3,
-    "fit_type": "poly"
+    "science":{
+      "prominence": 15,
+      "refine": true,
+      "ransac_minimum_matches": 10,
+      "fit_max_tries": 5000,
+      "fit_deg": 3,
+      "fit_type": "poly"
+    },
+    "standard": {
+      "prominence": 15,
+      "refine": true,
+      "ransac_minimum_matches": 9,
+      "fit_max_tries": 5000,
+      "fit_deg": 3,
+      "fit_type": "poly"
+    }
 }
 }
 

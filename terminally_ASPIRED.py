@@ -1,4 +1,7 @@
 import argparse
+
+from fontTools.svgLib.path import arc
+
 from spectral_reducer import SpectralReductionPipeline
 
 def main():
@@ -7,28 +10,31 @@ def main():
     )
 
     parser.add_argument("science", type = str, help = "Path to science FITS file")
-    parser.add_argument("science_arc", type = str, help = "Path to Arc FITS file")
+    parser.add_argument("arc", type = str, help = "Path to Arc FITS file")
     parser.add_argument("standard", type = str, help = "Path to standard FITS file")
-    parser.add_argument("standard_arc", type = str, help = "Path to Arc FITS file")
-    parser.add_argument("--config",type = str,default = "config_files/defaults.json",help = "Path to config JSON file (default: config_files/defaults.json)")
-    parser.add_argument("--use_bias_flats", action = "store_true",help = "Enables bias and flat field correction")
-    parser.add_argument("--bias_path", type = str, help = "Path to bias frames")
-    parser.add_argument("--flat_path", type = str, help = "Path to flat frames")
-    parser.add_argument("--interactive_trim", action = "store_true", help = "Enables interactive trim of science images")
-    parser.add_argument("--show_plots", action = "store_true", help = "Enables plotting of intermediate ASPIRED images")
-
+    parser.add_argument("standard_arc", type = str, help = "Path to standard arc FITS file")
+    parser.add_argument("--config",
+                        type = str,
+                        default = "config_files/defaults.json",
+                        help = "Path to config JSON file (default: config_files/defaults.json)"
+                        )
+    parser.add_argument("-b", "--bias", type = str, default="", help = "Path to bias directory skip on empty")
+    parser.add_argument("-f", "--flat-field", type = str, default="", help = "Path to flat directory skip on empty")
+    parser.add_argument("--interactive-trim", action = "store_true", help = "Enables interactive trim of science images")
+    parser.add_argument("--show-plots", action = "store_true", help = "Enables plotting of intermediate ASPIRED images")
+    parser.add_argument("-s", "--smooth", type = int, default=1, help = "Box smoothing by n points applied to final spectrum")
     args = parser.parse_args()
 
     # Run Pipeline
     pipeline = SpectralReductionPipeline(science_file=args.science,
-                                         arc_file=args.science_arc,
+                                         arc_file=args.arc,
                                          std_file=args.standard,
                                          std_arc_file=args.standard_arc,
                                          config_path=args.config,
-                                         use_bias_flats=args.use_bias_flats,
-                                         bias_path=args.bias_path,
-                                         flat_path=args.flat_path,
-                                         show_plots=args.show_plots)
+                                         bias_path=args.bias,
+                                         flat_path=args.flat_field,
+                                         show_plots=args.show_plots,
+                                         smooth=args.smooth)
 
     if args.interactive_trim:
         pipeline.run_with_interactive_trim()
