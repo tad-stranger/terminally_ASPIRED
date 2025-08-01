@@ -8,22 +8,25 @@ from astroscrappy import detect_cosmics
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
+import warnings
 from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
-                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False):
+                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False, no_warnings = True,
+                 output_dir_name = None, sky = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
         self.arc_std_path = Path(std_arc_file)
-
+        self.show_sky = sky
         self.smoothing_value = smooth
         self.verbose = verbose
         # Deduce base observation directory (e.g., ".../0503")
         # self.obs_base = self.science_path.parents[2]
-
+        if no_warnings:
+            warnings.filterwarnings("ignore")
         if bias_path == "":
             self.bias_folder = Path("DO_NOT_USE_BIAS")
         else:
@@ -41,7 +44,7 @@ class SpectralReductionPipeline:
 
         # Placeholder attributes
         self.object_name = None
-        self.output_dir = None
+        self.output_dir = output_dir_name
         self.cleaned = {}
 
         # FITS data
@@ -73,7 +76,10 @@ class SpectralReductionPipeline:
         self.arc_std_data, self.hdr_arc_std = _extract(arc_std_path)
 
         self.object_name = self.hdr_sci.get("OBJECT", "Unknown").replace(" ", "")
-        self.output_dir = Path(f"./ReducedSpectra/{self.object_name}")
+        if self.output_dir is None:
+            self.output_dir = Path(f"./ReducedSpectra/{self.object_name}")
+        else:
+            self.output_dir = Path(f"./ReducedSpectra/{self.output_dir}")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def write_filelists(self):
@@ -232,6 +238,8 @@ class SpectralReductionPipeline:
         if self.config["display_plots"]:
             self.onedspec.inspect_sensitivity()
         self.onedspec.apply_flux_calibration()
+        if self.config["display_plots"]:
+            self.onedspec.inspect_reduced_spectrum()
 
     def save_final_spectrum(self):
         output_dir = self.output_dir
@@ -253,20 +261,24 @@ class SpectralReductionPipeline:
         wav = pd.read_csv(wav_path, skiprows=1, names=['wav'])
         flux = pd.read_csv(flux_path, skiprows=1, names=['flux', 'uflux', 'sky'])
 
-        merged = pd.concat([wav, flux['flux']], axis=1)
+        merged = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
         merged.to_csv(output_dir / f"{object_name}.csv", header=True, index=False)
 
         # SNID-style space-separated output
         snid_path = output_dir / f"{object_name}_final.csv"
-        snid_file = pd.concat([wav, flux['flux']], axis=1)
+        snid_file = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
         snid_file.to_csv(snid_path, sep=' ', header=True, index=False)
 
 
     def plot_final_spectrum(self):
-        # Load data
+        def box_smoothing(y_data, box_pts):
+            box = np.ones(box_pts) / box_pts
+            return np.convolve(y_data, box, mode='same')
+
+        # Load y_data
         path = self.output_dir / f"{self.object_name}_final.csv"
         data = pd.read_csv(path, sep=' ')
-        wav, flux = data.iloc[:, 0] /10, data.iloc[:, 1]
+        wav, flux, sky = data.iloc[:, 0] /10, data.iloc[:, 1], data.iloc[:, 2]
 
         # Define the line wavelengths and names
         lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 468.6]
@@ -274,7 +286,9 @@ class SpectralReductionPipeline:
 
         # Plot the spectrum
         plt.figure(figsize=(12, 6))
-        plt.plot(wav, flux, color='black', linewidth=0.75, label='Final Spectrum')
+        plt.plot(wav, box_smoothing(flux, self.smoothing_value), color='black', linewidth=0.75, label='Final Spectrum')
+        if self.show_sky:
+            plt.plot(wav, sky, color='red', label='Sky Flux')
         plt.yscale('log')
         plt.xlabel("Wavelength (nm)", fontsize=12)
         plt.ylabel("Flux (arb)", fontsize=12)
