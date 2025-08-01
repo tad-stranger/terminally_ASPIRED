@@ -8,12 +8,13 @@ from astroscrappy import detect_cosmics
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
+import warnings
 from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
-                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False):
+                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False, no_warnings = True):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
@@ -23,7 +24,8 @@ class SpectralReductionPipeline:
         self.verbose = verbose
         # Deduce base observation directory (e.g., ".../0503")
         # self.obs_base = self.science_path.parents[2]
-
+        if no_warnings:
+            warnings.filterwarnings("ignore")
         if bias_path == "":
             self.bias_folder = Path("DO_NOT_USE_BIAS")
         else:

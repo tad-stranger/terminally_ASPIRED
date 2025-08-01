@@ -24,6 +24,7 @@ def main():
     parser.add_argument("--show-plots", action = "store_true", help = "Enables plotting of intermediate ASPIRED images")
     parser.add_argument("-s", "--smooth", type = int, default=1, help = "Box smoothing by n points applied to final spectrum plot")
     parser.add_argument("-v", "--verbose",action = "store_true", help = "Enables verbose mode")
+    parser.add_argument("--no-warnings", action = "store_true", help = "Disables warnings")
     args = parser.parse_args()
 
     # Run Pipeline
@@ -36,7 +37,8 @@ def main():
                                          flat_path=args.flat_field,
                                          show_plots=args.show_plots,
                                          smooth=args.smooth,
-                                         verbose=args.verbose)
+                                         verbose=args.verbose,
+                                         no_warnings=args.no_warnings)
 
     if args.interactive_trim:
         pipeline.run_with_interactive_trim()
