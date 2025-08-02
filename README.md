@@ -1,7 +1,5 @@
-# terminally_ASPIRED 🔭
-
 <h1>
-  <img src="assets/terminally_ASPIRED_logo.png" alt="Logo" width="50" style="vertical-align: middle; margin-right: 12px;">
+  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="60" style="vertical-align: middle; margin-right: 12px;">
   terminally_ASPIRED
 </h1>
 
@@ -97,7 +95,7 @@ This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally
 
 ---
 ## ☄️Acknowledgements
-Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients research team at The University of Cape Town (UCT)
+Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams at The University of Cape Town (UCT)
 and the South African Astronomical Observatory (SAAO). We would like to also thank the exellent developers of the RASCAL and ASPIRED packages.
 
 ---
