@@ -1,5 +1,11 @@
 # terminally_ASPIRED 🔭
 
+<h1>
+  <img src="assets/terminally_ASPIRED_logo.png" alt="Logo" width="50" style="vertical-align: middle; margin-right: 12px;">
+  terminally_ASPIRED
+</h1>
+
+
  A customizable, command-line-driven spectral reduction pipeline built around the [ASPIRED](https://github.com/cylammarco/ASPIRED) framework — tailored for data from the **SpUpNIC spectrograph** on the **SAAO 1.9m telescope**.
 Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robust automation with fine-grained user control via configuration files and interactive tools.
 ---
