@@ -12,7 +12,7 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 - Custom **wavelength calibration** with user-defined atlas lines
 - Built-in flux calibration and sensitivity inspection
 - CLI wrapper for fast processing with reproducible configuration
-- Automatic generation of final CSV output (science wavelength vs. flux)
+- Automatic generation of final CSV output (science wavelength vs. flux) in [SNID](https://people.lam.fr/blondin.stephane/software/snid/) - ready format for fast extragalactic transient classification.
 
 ---
 
@@ -33,33 +33,7 @@ We recommend using a virtual environment:
 conda env create -f environment.yml
 conda activate terminally_ASPIRED
 ```
-### Step 3: Modify ASPIRED
-A few manual tweaks to the ASPIRED source code are currently required for full compatibility. These should be applied after installing ASPIRED within the virtual environment:
 
-###  📂 `aspired/spectrum_oneD.py`
-
-> Full path depends on your conda installation, Typically:
-> `~/miniconda3/envs/terminally_ASPIRED/lib/python3.10/site-packages/aspired/spectrum_oneD.py`
-
-- **Comment out line 1307**:
-```python
-  # assert np.isfinite(seeing), "airmass has to be finite."
-  ```
-- **Replace lines 1283 and 1284 with:** 
-```python
-assert np.isfinite(float(airmass)), "airmass has to be finite."
-self.airmass = float(airmass)
-```
-### 📂 `rascal/calibrator.py`
-> Path: `.../site-packages/rascal/calibrator.py`
-- **Replace line 1545**:
-```python
-if self.pairs == []:
-```
-with:
-```python
-if self.pairs.size == 0:
-```
 ---
 ## ⚙️ Configuration: `defaults.json`
 This file controls all pipeline behaviour.
@@ -73,6 +47,39 @@ Key sections include:
 ---
 
 ## 🚀 CLI Usage
+### Basic Usage 
+```bash
+python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fits
+```
+### ⚙️ Required Arguments
+| Argument            | Description                                          |
+| ------------------- | ---------------------------------------------------- |
+| `science.fits`      | Path to the science target FITS file                 |
+| `arc.fits`          | Path to the arc lamp FITS file for the science frame |
+| `standard.fits`     | Path to the standard star FITS file                  |
+| `standard_arc.fits` | Path to the arc lamp FITS file for the standard star |
+
+
+### 🛠️ Optional Arguments
+| Flag                 | Description                                                          | Default                      |
+| -------------------- | -------------------------------------------------------------------- | ---------------------------- |
+| `--config`           | Path to JSON config file                                             | `config_files/defaults.json` |
+| `-b`, `--bias`       | Path to directory with bias frames (skip if empty)                   | `""`                         |
+| `-f`, `--flat-field` | Path to directory with flat fields (skip if empty)                   | `""`                         |
+| `--interactive-trim` | Enable interactive trimming of 2D spectra                            | Off                          |
+| `--show-plots`       | Show intermediate plots during reduction                             | Off                          |
+| `-s`, `--smooth`     | Smoothing box size for final 1D spectrum                             | `1` (no smoothing)           |
+| `-v`, `--verbose`    | Enable verbose output                                                | Off                          |
+| `--no-warnings`      | Suppress warning messages                                            | Off                          |
+| `-O`, `--output-dir` | Custom output directory name (default: object name from FITS header) | `None`                       |
+| `--show-sky`         | Show extracted sky spectrum in final plot                            | Off                          |
+
+### ⚠️ Note on Image Reduction
+By default, `terminally_ASPIRED` does not perform bias or flat field correction, as these steps have been found to degrade the quality of spectral extractions for data obtained with the SAAO 1.9m telescope. In practice, applying these corrections has led to poor extraction performance and unreliable wavelength and flux calibration.
+
+However, users may supply bias and flat field frames if they wish to experiment with including them in the reduction process.
+
+Dark frame correction is not implemented. This is because the CCD used on the 1.9m telescope is cryogenically cooled to temperatures around 170 K, rendering the dark current negligible.
 
 ---
 ## 📤 Output
