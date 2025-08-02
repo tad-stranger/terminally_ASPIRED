@@ -86,6 +86,7 @@ This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally
 ## ☄️Acknowledgements
 Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients research team at The University of Cape Town (UCT)
 and the South African Astronomical Observatory (SAAO). We would like to also thank the exellent developers of the RASCAL and ASPIRED packages.
+
 ---
 
 
