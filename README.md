@@ -1,4 +1,8 @@
-# terminally_ASPIRED 🔭
+<h1>
+  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="60" style="vertical-align: middle; margin-right: 12px;">
+  terminally_ASPIRED
+</h1>
+
 
  A customizable, command-line-driven spectral reduction pipeline built around the [ASPIRED](https://github.com/cylammarco/ASPIRED) framework — tailored for data from the **SpUpNIC spectrograph** on the **SAAO 1.9m telescope**.
 Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robust automation with fine-grained user control via configuration files and interactive tools.
@@ -91,7 +95,7 @@ This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally
 
 ---
 ## ☄️Acknowledgements
-Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients research team at The University of Cape Town (UCT)
+Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams at The University of Cape Town (UCT)
 and the South African Astronomical Observatory (SAAO). We would like to also thank the exellent developers of the RASCAL and ASPIRED packages.
 
 ---

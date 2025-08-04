@@ -1,65 +1,94 @@
 {
-  "trim_bounds": {
-    "x_min": 184,
-    "x_max": 1984,
-    "y_min": 50,
-    "y_max": 94
-  },
-
-  "display_plots": false,
-
-  "cosmic_ray": {
-    "sigclip": 4.5,
-    "sigfrac": 0.3,
-    "objlim": 5.0
-  },
-  "atlas_lines": [4198.317, 4277.5282, 4764.8646, 6965.43, 7067.2181 ,7383.9805, 7503.87,
-             7635.11, 7724.2072, 8006.1567, 8115.31],
-  "standard_name": "hilt600",
-  "trace_kwargs": {
-    "science": {
-      "nspec": 1, "nwindow": 20, "trace_width": 5,
-      "resample_factor": 15, "fit_deg": 3, "display": false,
-      "width": 1024, "height": 1024
+    "trim_bounds": {
+        "x_min": 184,
+        "x_max": 1984,
+        "y_min": 50,
+        "y_max": 94
     },
-    "standard": {
-      "nspec": 1, "nwindow": 20, "trace_width": 5,
-      "resample_factor": 2, "fit_deg": 2, "display": false,
-      "width": 1024, "height": 1024
-    }
-  },
-  "extract_kwargs": {
-    "science": {
-      "apwidth": 3, "optimal": true, "algorithm": "marsh89",
-      "skysep": 2, "skywidth": 5, "skydeg": 1, "display": false
+    "display_plots": false,
+    "cosmic_ray": {
+        "sigclip": 4.5,
+        "sigfrac": 0.3,
+        "objlim": 5.0
     },
-    "standard": {
-      "apwidth": 5, "optimal": true, "algorithm": "marsh89",
-      "skysep": 7, "skywidth": 5, "skydeg": 1, "display": false
-    }
-  },
-  "hough": {
-    "num_slopes": 1000, "xbins": 100, "ybins": 100,
-    "min_wavelength": 3500, "max_wavelength": 9000,
-    "range_tolerance": 500
-  },
-  "wavelength_cal": {
-    "science":{
-      "prominence": 15,
-      "refine": true,
-      "ransac_minimum_matches": 10,
-      "fit_max_tries": 5000,
-      "fit_deg": 3,
-      "fit_type": "poly"
+    "atlas_lines": [
+        4198.317,
+        6965.43,
+        7067.2181,
+        7383.9805,
+        7503.87,
+        7635.11,
+        7724.2072,
+        8006.1567,
+        8115.31
+    ],
+    "standard_name": "ltt6248",
+    "trace_kwargs": {
+        "science": {
+            "nspec": 1,
+            "nwindow": 20,
+            "trace_width": 5,
+            "resample_factor": 15,
+            "fit_deg": 3,
+            "display": false,
+            "width": 1024,
+            "height": 1024
+        },
+        "standard": {
+            "nspec": 1,
+            "nwindow": 20,
+            "trace_width": 5,
+            "resample_factor": 2,
+            "fit_deg": 2,
+            "display": false,
+            "width": 1024,
+            "height": 1024
+        }
     },
-    "standard": {
-      "prominence": 15,
-      "refine": true,
-      "ransac_minimum_matches": 9,
-      "fit_max_tries": 5000,
-      "fit_deg": 3,
-      "fit_type": "poly"
+    "extract_kwargs": {
+        "science": {
+            "apwidth": 3,
+            "optimal": true,
+            "algorithm": "marsh89",
+            "skysep": 2,
+            "skywidth": 5,
+            "skydeg": 1,
+            "display": false
+        },
+        "standard": {
+            "apwidth": 5,
+            "optimal": true,
+            "algorithm": "marsh89",
+            "skysep": 7,
+            "skywidth": 5,
+            "skydeg": 1,
+            "display": false
+        }
+    },
+    "hough": {
+        "num_slopes": 1000,
+        "xbins": 100,
+        "ybins": 100,
+        "min_wavelength": 3500,
+        "max_wavelength": 9000,
+        "range_tolerance": 500
+    },
+    "wavelength_cal": {
+        "science": {
+            "prominence": 16,
+            "refine": true,
+            "ransac_minimum_matches": 8,
+            "fit_max_tries": 5000,
+            "fit_deg": 3,
+            "fit_type": "poly"
+        },
+        "standard": {
+            "prominence": 17,
+            "refine": true,
+            "ransac_minimum_matches": 8,
+            "fit_max_tries": 5000,
+            "fit_deg": 3,
+            "fit_type": "poly"
+        }
     }
 }
-}
-

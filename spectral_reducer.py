@@ -383,16 +383,22 @@ class SpectralReductionPipeline:
 
         save = input("Save this region as the new default trimming bounds? (y/n): ").strip().lower()
         if save == 'y':
-            self.config["trim_bounds"] = coords
-            save_path = "config_files/trim_bounds.json"
-            Path(save_path).parent.mkdir(parents=True, exist_ok=True)
-            with open(save_path, 'w') as f:
-                json.dump(coords, f, indent=4)
-            print(f"New trimming bounds saved to {save_path}")
+            defaults_path = "config_files/defaults.json"
+            try:
+                with open(defaults_path, 'r') as f:
+                    defaults = json.load(f)
+            except FileNotFoundError:
+                print(f"Could not find {defaults_path}.")
+
+            defaults["trim_bounds"] = coords
+
+            with open(defaults_path, 'w') as f:
+                json.dump(defaults, f, indent=4)
+            print(f"Trim bounds saved to {defaults_path}")
         else:
             print("New trimming bounds not saved. Using for current session only.")
 
-        # Always update in-memory config
+        # update in-memory config
         self.config["trim_bounds"] = coords
 
 
