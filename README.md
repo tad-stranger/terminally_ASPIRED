@@ -70,7 +70,7 @@ python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fi
 | `--config`           | Path to JSON config file                                             | `config_files/defaults.json` |
 | `-b`, `--bias`       | Path to directory with bias frames (skip if empty)                   | `""`                         |
 | `-f`, `--flat-field` | Path to directory with flat fields (skip if empty)                   | `""`                         |
-| `--interactive-trim` | Enable interactive trimming of 2D spectra                            | Off                          |
+| `-t`,`--interactive-trim` | Enable interactive trimming of 2D spectra                            | Off                     |
 | `--show-plots`       | Show intermediate plots during reduction                             | Off                          |
 | `-s`, `--smooth`     | Smoothing box size for final 1D spectrum                             | `1` (no smoothing)           |
 | `-v`, `--verbose`    | Enable verbose output                                                | Off                          |
