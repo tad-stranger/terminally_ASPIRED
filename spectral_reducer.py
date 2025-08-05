@@ -23,6 +23,7 @@ class SpectralReductionPipeline:
         self.show_sky = sky
         self.smoothing_value = smooth
         self.verbose = verbose
+        self.master_bias = None
         # Deduce base observation directory (e.g., ".../0503")
         # self.obs_base = self.science_path.parents[2]
         if no_warnings:
@@ -81,6 +82,21 @@ class SpectralReductionPipeline:
         else:
             self.output_dir = Path(f"./ReducedSpectra/{self.output_dir}")
         self.output_dir.mkdir(parents=True, exist_ok=True)
+
+    def create_master_bias(self):
+        bias_files = Path(self.bias_folder / "*")
+
+        # Load all bias frames into a list
+        bias_data = [fits.getdata(file) for file in bias_files]
+
+        # Stack and take median to create master bias
+        self.master_bias = np.median(bias_data, axis=0)
+
+        # Save the master bias to a new FITS file
+        #fits.writeto(f'ReducedSpectra/{self.output_dir}', self.master_bias, overwrite=True)
+
+        if self.verbose:
+            print("Master bias created successfully.")
 
     def write_filelists(self):
         def write(filelist_path, science_file):
