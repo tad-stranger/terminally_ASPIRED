@@ -83,24 +83,68 @@ class SpectralReductionPipeline:
             self.output_dir = Path(f"./ReducedSpectra/{self.output_dir}")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def create_master_bias(self):
-        bias_files = Path(self.bias_folder / "*")
+    def bias_subtract(self):
+        if self.bias_folder == Path("DO_NOT_USE_BIAS"):
+           if self.verbose:
+            print("No Bias filed supplied. Bias subtraction skipped.")
+           return
 
-        # Load all bias frames into a list
+
+        bias_files = sorted(self.bias_folder.glob("*.fits"))
         bias_data = [fits.getdata(file) for file in bias_files]
-
-        # Stack and take median to create master bias
         self.master_bias = np.median(bias_data, axis=0)
 
-        # Save the master bias to a new FITS file
-        #fits.writeto(f'ReducedSpectra/{self.output_dir}', self.master_bias, overwrite=True)
+        def subtract_and_clean(image, label):
+            image = np.nan_to_num(image, nan=0.0)
+            self.master_bias = np.nan_to_num(self.master_bias, nan=0.0)
+            subtracted_image = image - self.master_bias
+            subtracted_image = np.nan_to_num(subtracted_image, nan=0.0)
+            subtracted_image[subtracted_image < 0] = 0.0
+            print(f"{label}: NaNs in subtracted_image = {np.isnan(subtracted_image).sum()}")  # Debug print
+            out_path = self.output_dir / f"{self.object_name}_{label}_bias_subtracted.fits"
+            fits.writeto(out_path, subtracted_image.astype(np.float32), overwrite=True)
+            return subtracted_image
 
-        if self.verbose:
-            print("Master bias created successfully.")
+        self.sci_data = subtract_and_clean(self.sci_data, 'sci')
+        self.std_data = subtract_and_clean(self.std_data, 'std')
+        self.arc_data = subtract_and_clean(self.arc_data, 'arc')
+        self.arc_std_data = subtract_and_clean(self.arc_std_data, 'arc_std')
 
-    def bias_subtract(self):
-        print("Bias subtract")
-        # Do Median Stack for images (sci, std, sci_arc, std_arc and all flats passed)
+        # Also subtract bias from all flats
+        if self.flat_folder != Path("DO_NOT_USE_FLATS"):
+            flat_files = sorted(self.flat_folder.glob("*.fits"))
+            if flat_files:
+                bias_flat_dir = self.output_dir / "flat_bias_subtracted"
+                bias_flat_dir.mkdir(parents=True, exist_ok=True)
+
+                # Ensure master bias is clean
+                self.master_bias = np.nan_to_num(self.master_bias, nan=0.0)
+
+                for flat_file in flat_files:
+                    flat_data = fits.getdata(flat_file)
+
+                    # Clean the input flat image
+                    flat_data = np.nan_to_num(flat_data, nan=0.0)
+
+                    # Subtract clean bias
+                    subtracted_flat = flat_data - self.master_bias
+
+                    # Clean result
+                    subtracted_flat = np.nan_to_num(subtracted_flat, nan=0.0)
+                    subtracted_flat[subtracted_flat < 0] = 0.0
+
+                    # Diagnostic print
+                    print(f"{flat_file.name}: NaNs in subtracted flat = {np.isnan(subtracted_flat).sum()}")
+
+                    # Save cleaned flat
+                    out_path = bias_flat_dir / flat_file.name
+                    fits.writeto(out_path, subtracted_flat.astype(np.float32), overwrite=True)
+
+                # Update flat_folder to point to the new directory
+                self.flat_folder = bias_flat_dir
+            else:
+                if self.verbose:
+                    print("No flat frames found for bias subtraction.")
 
     def write_filelists(self):
         def write(filelist_path, science_file):
@@ -111,13 +155,19 @@ class SpectralReductionPipeline:
                 f.write(f"arc, {self.arc_file_resolved}\n")
                 f.write(f"light, {science_file}\n")
 
+        if self.bias_folder == Path("DO_NOT_USE_BIAS"):
+            self.arc_std_file_resolved = self._save_fits(self.arc_std_data, self.hdr_arc_std,f"{self.object_name}_arc_std.fits")
+            self.arc_file_resolved = self._save_fits(self.arc_data, self.hdr_arc,f"{self.object_name}_arc.fits")
+            sci_resolved = self._save_fits(self.sci_data, self.hdr_sci, f"{self.object_name}_sci.fits")
+            std_resolved = self._save_fits(self.std_data, self.hdr_std, f"{self.object_name}_std.fits")
+        else:
+            self.arc_std_file_resolved = self._save_fits(self.arc_std_data, self.hdr_arc_std,f"{self.object_name}_arc_std_bias_subtracted.fits")
+            self.arc_file_resolved = self._save_fits(self.arc_data, self.hdr_arc,f"{self.object_name}_arc_bias_subtracted.fits")
+            sci_resolved = self._save_fits(self.sci_data, self.hdr_sci, f"{self.object_name}_sci_bias_subtracted.fits")
+            std_resolved = self._save_fits(self.std_data, self.hdr_std, f"{self.object_name}_std_bias_subtracted.fits")
+
+
         # Save FITS files first
-        self.arc_std_file_resolved = self._save_fits(self.arc_std_data, self.hdr_arc_std,f"{self.object_name}_arc_std.fits")
-        self.arc_file_resolved = self._save_fits(self.arc_data, self.hdr_arc, f"{self.object_name}_arc.fits")
-        sci_resolved = self._save_fits(self.sci_data, self.hdr_sci, f"{self.object_name}_sci.fits")
-        std_resolved = self._save_fits(self.std_data, self.hdr_std, f"{self.object_name}_std.fits")
-
-
         write(self.output_dir / f"{self.object_name}_science_file.list", sci_resolved)
         write(self.output_dir / f"{self.object_name}_standard_file.list", std_resolved)
 
@@ -424,6 +474,7 @@ class SpectralReductionPipeline:
 
     def run(self):
         self.extract_data()
+        self.bias_subtract()
         self.write_filelists()
         self.reduce_images()
         self.trim_and_clean()
@@ -435,6 +486,7 @@ class SpectralReductionPipeline:
 
     def run_with_interactive_trim(self, tag = "science"):
         self.extract_data()
+        self.bias_subtract()
         self.write_filelists()
         self.reduce_images()
         self.interactive_trim(tag=tag)
