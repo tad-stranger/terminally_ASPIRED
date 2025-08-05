@@ -82,22 +82,25 @@ class SpectralReductionPipeline:
             self.output_dir = Path(f"./ReducedSpectra/{self.output_dir}")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+    def bias_subtract(self):
+        print("Bias subtract")
+        # Do Median Stack for images (sci, std, sci_arc, std_arc and all flats passed)
+
     def write_filelists(self):
         def write(filelist_path, science_file):
-            bias_files = sorted(self.bias_folder.glob("*.fits"))
             flat_files = sorted(self.flat_folder.glob("*.fits"))
             with open(filelist_path, "w") as f:
-                for file in bias_files:
-                    f.write(f"bias, {file.resolve()}\n")
                 for file in flat_files:
                     f.write(f"flat, {file.resolve()}\n")
                 f.write(f"arc, {self.arc_file_resolved}\n")
                 f.write(f"light, {science_file}\n")
 
         # Save FITS files first
+        self.arc_std_file_resolved = self._save_fits(self.arc_std_data, self.hdr_arc_std,f"{self.object_name}_arc_std.fits")
         self.arc_file_resolved = self._save_fits(self.arc_data, self.hdr_arc, f"{self.object_name}_arc.fits")
         sci_resolved = self._save_fits(self.sci_data, self.hdr_sci, f"{self.object_name}_sci.fits")
         std_resolved = self._save_fits(self.std_data, self.hdr_std, f"{self.object_name}_std.fits")
+
 
         write(self.output_dir / f"{self.object_name}_science_file.list", sci_resolved)
         write(self.output_dir / f"{self.object_name}_standard_file.list", std_resolved)
@@ -106,6 +109,7 @@ class SpectralReductionPipeline:
         path = (self.output_dir / filename).resolve()
         fits.writeto(path, data, header, overwrite=True)
         return path
+
 
     def reduce_images(self):
         def reduce(list_file, tag):
