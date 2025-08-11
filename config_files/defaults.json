@@ -24,13 +24,13 @@
         8006.1567,
         8115.31
     ],
-    "standard_name": "hilt600",
+    "standard_name": "ltt6248",
     "trace_kwargs": {
         "science": {
             "nspec": 1,
             "nwindow": 20,
-            "trace_width": 5,
-            "resample_factor": 15,
+            "trace_width": 3,
+            "resample_factor": 2,
             "fit_deg": 3,
             "display": false,
             "width": 1024,
