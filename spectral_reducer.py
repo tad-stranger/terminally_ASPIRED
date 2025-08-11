@@ -100,7 +100,6 @@ class SpectralReductionPipeline:
             subtracted_image = image - self.master_bias
             subtracted_image = np.nan_to_num(subtracted_image, nan=0.0)
             subtracted_image[subtracted_image < 0] = 0.0
-            print(f"{label}: NaNs in subtracted_image = {np.isnan(subtracted_image).sum()}")  # Debug print
             out_path = self.output_dir / f"{self.object_name}_{label}_bias_subtracted.fits"
             fits.writeto(out_path, subtracted_image.astype(np.float32), overwrite=True)
             return subtracted_image
@@ -133,8 +132,6 @@ class SpectralReductionPipeline:
                     subtracted_flat = np.nan_to_num(subtracted_flat, nan=0.0)
                     subtracted_flat[subtracted_flat < 0] = 0.0
 
-                    # Diagnostic print
-                    print(f"{flat_file.name}: NaNs in subtracted flat = {np.isnan(subtracted_flat).sum()}")
 
                     # Save cleaned flat
                     out_path = bias_flat_dir / flat_file.name
@@ -201,10 +198,10 @@ class SpectralReductionPipeline:
             _, cleaned = detect_cosmics(data, **self.config["cosmic_ray"], verbose=self.verbose)
             return cleaned
 
-        self.cleaned["sci"] = clean(trim(self._load_image("science")))
-        self.cleaned["arc"] = clean(trim(self.arc_data))
-        self.cleaned["std"] = clean(trim(self._load_image("standard")))
-        self.cleaned["arc_std"] = clean(trim(self.arc_std_data))
+        self.cleaned["sci"] = np.nan_to_num(clean(trim(self._load_image("science"))), nan = 0.1)
+        self.cleaned["arc"] = np.nan_to_num(clean(trim(self.arc_data)), nan = 0.1)
+        self.cleaned["std"] = np.nan_to_num(clean(trim(self._load_image("standard"))), nan = 0.1)
+        self.cleaned["arc_std"] = np.nan_to_num(clean(trim(self.arc_std_data)), nan = 0.1)
 
     def _load_image(self, tag):
         data, _ = fits.getdata(self.output_dir / f"{self.object_name}_{tag}_image_reduced.fits", header=True)
