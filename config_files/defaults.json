@@ -51,7 +51,7 @@
         "science": {
             "apwidth": 3,
             "optimal": true,
-            "algorithm": "marsh89",
+            "algorithm": "horne86",
             "skysep": 2,
             "skywidth": 5,
             "skydeg": 1,
@@ -60,8 +60,8 @@
         "standard": {
             "apwidth": 5,
             "optimal": true,
-            "algorithm": "marsh89",
-            "skysep": 7,
+            "algorithm": "horne86",
+            "skysep": 2,
             "skywidth": 5,
             "skydeg": 1,
             "display": false
