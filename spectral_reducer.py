@@ -14,7 +14,7 @@ from tkinter import Tk, Label, Entry, Button
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
-                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False, no_warnings = True,
+                 bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
                  output_dir_name = None, sky = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
@@ -24,6 +24,7 @@ class SpectralReductionPipeline:
         self.smoothing_value = smooth
         self.verbose = verbose
         self.master_bias = None
+        self.interactive_trim = interactive_trim
         # Deduce base observation directory (e.g., ".../0503")
         # self.obs_base = self.science_path.parents[2]
         if no_warnings:
@@ -57,9 +58,25 @@ class SpectralReductionPipeline:
         self.hdr_arc = None
         self.hdr_std = None
 
+
+
     def _load_config(self, path):
         with open(path, 'r') as f:
             return json.load(f)
+
+    def _trim_raw_data(self):
+        bounds = self.config["trim_bounds"]
+
+        def trim(data):
+            return data[
+                   bounds["y_min"]:bounds["y_max"],
+                   bounds["x_min"]:bounds["x_max"]
+                   ]
+
+        self.sci_data = trim(self.sci_data)
+        self.arc_data = trim(self.arc_data)
+        self.std_data = trim(self.std_data)
+        self.arc_std_data = trim(self.arc_std_data)
 
     def extract_data(self):
         def _extract(path):
@@ -76,6 +93,41 @@ class SpectralReductionPipeline:
         self.std_data, self.hdr_std = _extract(std_path)
         self.arc_std_data, self.hdr_arc_std = _extract(arc_std_path)
 
+        # Trim Raw files
+        if self.interactive_trim == True:
+            self.interactive_trim_function(tag = "science")
+            self._trim_raw_data()
+        else:
+            self._trim_raw_data()
+
+        # Load and trim bias frames (if bias folder is set and exists)
+        if self.bias_folder != Path("DO_NOT_USE_BIAS"):
+            bias_files = sorted(self.bias_folder.glob("*.fits"))
+            self.bias_data_list = []
+            for bf in bias_files:
+                data, header = fits.getdata(bf, header=True)
+                data = np.flip(data, axis=1)
+                # Trim using same bounds
+                data = data[
+                       self.config["trim_bounds"]["y_min"]:self.config["trim_bounds"]["y_max"],
+                       self.config["trim_bounds"]["x_min"]:self.config["trim_bounds"]["x_max"]
+                       ]
+                self.bias_data_list.append(data)
+
+        # Load and trim flat frames (if flat folder is set and exists)
+        if self.flat_folder != Path("DO_NOT_USE_FLATS"):
+            flat_files = sorted(self.flat_folder.glob("*.fits"))
+            self.flat_data_list = []
+            for ff in flat_files:
+                data, header = fits.getdata(ff, header=True)
+                data = np.flip(data, axis=1)
+                # Trim using same bounds
+                data = data[
+                       self.config["trim_bounds"]["y_min"]:self.config["trim_bounds"]["y_max"],
+                       self.config["trim_bounds"]["x_min"]:self.config["trim_bounds"]["x_max"]
+                       ]
+                self.flat_data_list.append(data)
+
         self.object_name = self.hdr_sci.get("OBJECT", "Unknown").replace(" ", "")
         if self.output_dir is None:
             self.output_dir = Path(f"./ReducedSpectra/{self.object_name}")
@@ -84,19 +136,18 @@ class SpectralReductionPipeline:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def bias_subtract(self):
-        if self.bias_folder == Path("DO_NOT_USE_BIAS"):
-           if self.verbose:
-            print("No Bias filed supplied. Bias subtraction skipped.")
-           return
+        if self.bias_folder == Path("DO_NOT_USE_BIAS") or not hasattr(self, "bias_data_list") or len(
+                self.bias_data_list) == 0:
+            if self.verbose:
+                print("No Bias files supplied or loaded. Bias subtraction skipped.")
+            return
 
-
-        bias_files = sorted(self.bias_folder.glob("*.fits"))
-        bias_data = [fits.getdata(file) for file in bias_files]
-        self.master_bias = np.median(bias_data, axis=0)
+        # Compute master bias from trimmed bias frames
+        self.master_bias = np.median(self.bias_data_list, axis=0)
+        self.master_bias = np.nan_to_num(self.master_bias, nan=0.0)
 
         def subtract_and_clean(image, label):
             image = np.nan_to_num(image, nan=0.0)
-            self.master_bias = np.nan_to_num(self.master_bias, nan=0.0)
             subtracted_image = image - self.master_bias
             subtracted_image = np.nan_to_num(subtracted_image, nan=0.0)
             subtracted_image[subtracted_image < 0] = 0.0
@@ -109,47 +160,32 @@ class SpectralReductionPipeline:
         self.arc_data = subtract_and_clean(self.arc_data, 'arc')
         self.arc_std_data = subtract_and_clean(self.arc_std_data, 'arc_std')
 
-        # Also subtract bias from all flats
-        if self.flat_folder != Path("DO_NOT_USE_FLATS"):
-            flat_files = sorted(self.flat_folder.glob("*.fits"))
-            if flat_files:
-                bias_flat_dir = self.output_dir / "flat_bias_subtracted"
-                bias_flat_dir.mkdir(parents=True, exist_ok=True)
+        # Also subtract bias from trimmed flats (if any)
+        if self.flat_folder != Path("DO_NOT_USE_FLATS") and hasattr(self, "flat_data_list") and len(
+                self.flat_data_list) > 0:
+            bias_flat_dir = self.output_dir / "flat_bias_subtracted"
+            bias_flat_dir.mkdir(parents=True, exist_ok=True)
 
-                # Ensure master bias is clean
-                self.master_bias = np.nan_to_num(self.master_bias, nan=0.0)
+            for i, flat_data in enumerate(self.flat_data_list):
+                flat_data = np.nan_to_num(flat_data, nan=0.0)
+                subtracted_flat = flat_data - self.master_bias
+                subtracted_flat = np.nan_to_num(subtracted_flat, nan=0.0)
+                subtracted_flat[subtracted_flat < 0] = 0.0
 
-                for flat_file in flat_files:
-                    flat_data = fits.getdata(flat_file)
+                # Save cleaned flat with original filename
+                flat_files = sorted(self.flat_folder.glob("*.fits"))
+                out_path = bias_flat_dir / flat_files[i].name
+                fits.writeto(out_path, subtracted_flat.astype(np.float32), overwrite=True)
 
-                    # Clean the input flat image
-                    flat_data = np.nan_to_num(flat_data, nan=0.0)
-
-                    # Subtract clean bias
-                    subtracted_flat = flat_data - self.master_bias
-
-                    # Clean result
-                    subtracted_flat = np.nan_to_num(subtracted_flat, nan=0.0)
-                    subtracted_flat[subtracted_flat < 0] = 0.0
-
-
-                    # Save cleaned flat
-                    out_path = bias_flat_dir / flat_file.name
-                    fits.writeto(out_path, subtracted_flat.astype(np.float32), overwrite=True)
-
-                # Update flat_folder to point to the new directory
-                self.flat_folder = bias_flat_dir
-            else:
-                if self.verbose:
-                    print("No flat frames found for bias subtraction.")
+            self.flat_folder = bias_flat_dir
 
     def write_filelists(self):
-        def write(filelist_path, science_file):
+        def write(filelist_path, science_file, arc_file):
             flat_files = sorted(self.flat_folder.glob("*.fits"))
             with open(filelist_path, "w") as f:
                 for file in flat_files:
                     f.write(f"flat, {file.resolve()}\n")
-                f.write(f"arc, {self.arc_file_resolved}\n")
+                f.write(f"arc, {arc_file}\n")
                 f.write(f"light, {science_file}\n")
 
         if self.bias_folder == Path("DO_NOT_USE_BIAS"):
@@ -165,8 +201,8 @@ class SpectralReductionPipeline:
 
 
         # Save FITS files first
-        write(self.output_dir / f"{self.object_name}_science_file.list", sci_resolved)
-        write(self.output_dir / f"{self.object_name}_standard_file.list", std_resolved)
+        write(self.output_dir / f"{self.object_name}_science_file.list", sci_resolved, self.arc_file_resolved)
+        write(self.output_dir / f"{self.object_name}_standard_file.list", std_resolved, self.arc_std_file_resolved)
 
     def _save_fits(self, data, header, filename):
         path = (self.output_dir / filename).resolve()
@@ -185,23 +221,17 @@ class SpectralReductionPipeline:
         reduce(self.output_dir / f"{self.object_name}_science_file.list", tag="science")
         reduce(self.output_dir / f"{self.object_name}_standard_file.list", tag="standard")
 
-    def trim_and_clean(self):
+    def cosmic_clean(self):
         bounds = self.config["trim_bounds"]
-
-        def trim(data):
-            return data[
-                   bounds["y_min"]:bounds["y_max"],
-                   bounds["x_min"]:bounds["x_max"]
-                   ]
 
         def clean(data):
             _, cleaned = detect_cosmics(data, **self.config["cosmic_ray"], verbose=self.verbose)
             return cleaned
 
-        self.cleaned["sci"] = np.nan_to_num(clean(trim(self._load_image("science"))), nan = 0.1)
-        self.cleaned["arc"] = np.nan_to_num(clean(trim(self.arc_data)), nan = 0.1)
-        self.cleaned["std"] = np.nan_to_num(clean(trim(self._load_image("standard"))), nan = 0.1)
-        self.cleaned["arc_std"] = np.nan_to_num(clean(trim(self.arc_std_data)), nan = 0.1)
+        self.cleaned["sci"] = np.nan_to_num(clean(self._load_image("science")), nan = 0.0)
+        self.cleaned["arc"] = np.nan_to_num(clean(self.arc_data), nan = 0.0)
+        self.cleaned["std"] = np.nan_to_num(clean(self._load_image("standard")), nan = 0.0)
+        self.cleaned["arc_std"] = np.nan_to_num(clean(self.arc_std_data), nan = 0.0)
 
     def _load_image(self, tag):
         data, _ = fits.getdata(self.output_dir / f"{self.object_name}_{tag}_image_reduced.fits", header=True)
@@ -375,9 +405,16 @@ class SpectralReductionPipeline:
         plt.savefig(self.output_dir / f"{self.object_name}_log_plot.png", dpi=300)
         plt.show()
 
-    def interactive_trim(self, tag="science"):
-        data = self._load_image(tag)  # 2D reduced science image
-        arc = self.arc_data  # Raw or reduced arc frame (should already be flipped and loaded)
+    def interactive_trim_function(self, tag="science"):
+
+        # Helper function to load raw, flipped data
+        def _load_raw(path):
+            data,_ = fits.getdata(path, header=True)
+            return np.flip(data, axis = 1)
+
+        # Load Raw images
+        data = _load_raw(self.science_path)  # 2D reduced science image
+        arc = _load_raw(self.arc_path)  # Raw or reduced arc frame (should already be flipped and loaded)
 
         fig, (ax2d, ax1d_sci, ax1d_arc) = plt.subplots(
             3, 1, figsize=(10, 10), gridspec_kw={'height_ratios': [3, 1, 1]}
@@ -474,20 +511,7 @@ class SpectralReductionPipeline:
         self.bias_subtract()
         self.write_filelists()
         self.reduce_images()
-        self.trim_and_clean()
-        self.extract_2dspec()
-        self.calibrate_wavelength()
-        self.calibrate_flux()
-        self.save_final_spectrum()
-        self.plot_final_spectrum()
-
-    def run_with_interactive_trim(self, tag = "science"):
-        self.extract_data()
-        self.bias_subtract()
-        self.write_filelists()
-        self.reduce_images()
-        self.interactive_trim(tag=tag)
-        self.trim_and_clean()
+        self.cosmic_clean()
         self.extract_2dspec()
         self.calibrate_wavelength()
         self.calibrate_flux()

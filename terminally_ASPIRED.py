@@ -34,6 +34,7 @@ def main():
                                          config_path=args.config,
                                          bias_path=args.bias,
                                          flat_path=args.flat_field,
+                                         interactive_trim = args.interactive_trim,
                                          show_plots=args.show_plots,
                                          smooth=args.smooth,
                                          verbose=args.verbose,
@@ -41,10 +42,7 @@ def main():
                                          output_dir_name=args.output_dir,
                                          sky=args.show_sky)
 
-    if args.interactive_trim:
-        pipeline.run_with_interactive_trim()
-    else:
-        pipeline.run()
+    pipeline.run()
 
 
 if __name__ == "__main__":
