@@ -14,7 +14,7 @@ from tkinter import Tk, Label, Entry, Button
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
-                 bias_path = None, flat_path = None, show_plots = False, smooth = 1, verbose = False, no_warnings = True,
+                 bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
                  output_dir_name = None, sky = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
@@ -24,6 +24,7 @@ class SpectralReductionPipeline:
         self.smoothing_value = smooth
         self.verbose = verbose
         self.master_bias = None
+        self.interactive_trim = interactive_trim
         # Deduce base observation directory (e.g., ".../0503")
         # self.obs_base = self.science_path.parents[2]
         if no_warnings:
@@ -93,7 +94,11 @@ class SpectralReductionPipeline:
         self.arc_std_data, self.hdr_arc_std = _extract(arc_std_path)
 
         # Trim Raw files
-        self._trim_raw_data()
+        if self.interactive_trim == True:
+            self.interactive_trim_function(tag = "science")
+            self._trim_raw_data()
+        else:
+            self._trim_raw_data()
 
         # Load and trim bias frames (if bias folder is set and exists)
         if self.bias_folder != Path("DO_NOT_USE_BIAS"):
@@ -400,9 +405,16 @@ class SpectralReductionPipeline:
         plt.savefig(self.output_dir / f"{self.object_name}_log_plot.png", dpi=300)
         plt.show()
 
-    def interactive_trim(self, tag="science"):
-        data = self._load_image(tag)  # 2D reduced science image
-        arc = self.arc_data  # Raw or reduced arc frame (should already be flipped and loaded)
+    def interactive_trim_function(self, tag="science"):
+
+        # Helper function to load raw, flipped data
+        def _load_raw(path):
+            data,_ = fits.getdata(path, header=True)
+            return np.flip(data, axis = 1)
+
+        # Load Raw images
+        data = _load_raw(self.science_path)  # 2D reduced science image
+        arc = _load_raw(self.arc_path)  # Raw or reduced arc frame (should already be flipped and loaded)
 
         fig, (ax2d, ax1d_sci, ax1d_arc) = plt.subplots(
             3, 1, figsize=(10, 10), gridspec_kw={'height_ratios': [3, 1, 1]}
@@ -499,19 +511,6 @@ class SpectralReductionPipeline:
         self.bias_subtract()
         self.write_filelists()
         self.reduce_images()
-        self.cosmic_clean()
-        self.extract_2dspec()
-        self.calibrate_wavelength()
-        self.calibrate_flux()
-        self.save_final_spectrum()
-        self.plot_final_spectrum()
-
-    def run_with_interactive_trim(self, tag = "science"):
-        self.extract_data()
-        self.bias_subtract()
-        self.write_filelists()
-        self.reduce_images()
-        self.interactive_trim(tag=tag)
         self.cosmic_clean()
         self.extract_2dspec()
         self.calibrate_wavelength()
