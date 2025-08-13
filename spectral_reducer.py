@@ -93,6 +93,16 @@ class SpectralReductionPipeline:
         self.std_data, self.hdr_std = _extract(std_path)
         self.arc_std_data, self.hdr_arc_std = _extract(arc_std_path)
 
+        # Check if raw files all have the same shape.
+        shapes  = {"science": self.sci_data.shape,
+                   "arc": self.arc_data.shape,
+                   "std": self.std_data.shape,
+                   "arc_std": self.arc_std_data.shape}
+
+        if len(set(shapes.values())) != 1:
+            raise ValueError(f"Shape mismatch in raw frames before trimming: {shapes}")
+
+
         # Trim Raw files
         if self.interactive_trim == True:
             self.interactive_trim_function(tag = "science")
@@ -117,6 +127,7 @@ class SpectralReductionPipeline:
         # Load and trim flat frames (if flat folder is set and exists)
         if self.flat_folder != Path("DO_NOT_USE_FLATS"):
             flat_files = sorted(self.flat_folder.glob("*.fits"))
+            self._original_flat_files = flat_files # Keep for later saving
             self.flat_data_list = []
             for ff in flat_files:
                 data, header = fits.getdata(ff, header=True)
@@ -179,7 +190,42 @@ class SpectralReductionPipeline:
 
             self.flat_folder = bias_flat_dir
 
+    def _ensure_trimmed_flats_on_disk(self):
+        """If no bias is used, write the in-memory trimmed flats to disk so the reducer
+        gets correctly trimmed files with the right shape."""
+        if self.flat_folder == Path("DO_NOT_USE_FLATS"):
+            return
+        if not hasattr(self, "flat_data_list") or len(self.flat_data_list) == 0:
+            return
+
+        # If bias_subtract() ran, it already wrote bias-subtracted (and trimmed) flats
+        # and repointed self.flat_folder to that directory. In that case, do nothing.
+        # We only need this when NO bias was used.
+        if self.master_bias is not None:
+            return
+
+        # Write trimmed-only flats to disk, mirror original filenames
+        out_dir = self.output_dir / "flat_trimmed"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Use original filenames if available, else just enumerate
+        if hasattr(self, "_original_flat_files"):
+            names = [p.name for p in self._original_flat_files]
+        else:
+            names = [f"flat_{i:03d}.fits" for i in range(len(self.flat_data_list))]
+
+        for arr, name in zip(self.flat_data_list, names):
+            # Write with a minimal header; if you want to preserve headers, load them above and save here.
+            fits.writeto(out_dir / name, np.asarray(arr, dtype=np.float32), overwrite=True)
+
+        # Point flat_folder to the trimmed set on disk so filelists use the right files
+        self.flat_folder = out_dir
+
+
     def write_filelists(self):
+
+        # Ensure flats on disk have the same shape as trimmed science/arc
+        self._ensure_trimmed_flats_on_disk()
         def write(filelist_path, science_file, arc_file):
             flat_files = sorted(self.flat_folder.glob("*.fits"))
             with open(filelist_path, "w") as f:
