@@ -79,10 +79,6 @@ python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fi
 | `--show-sky`         | Show extracted sky spectrum in final plot                            | Off                          |
 
 ### ⚠️ Note on Image Reduction
-By default, `terminally_ASPIRED` does not perform bias or flat field correction, as these steps have been found to degrade the quality of spectral extractions for data obtained with the SAAO 1.9m telescope. In practice, applying these corrections has led to poor extraction performance and unreliable wavelength and flux calibration.
-
-However, users may supply bias and flat field frames if they wish to experiment with including them in the reduction process.
-
 Dark frame correction is not implemented. This is because the CCD used on the 1.9m telescope is cryogenically cooled to temperatures around 170 K, rendering the dark current negligible.
 
 ---
@@ -95,9 +91,7 @@ This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally
 
 ---
 ## ☄️Acknowledgements
-Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams at The University of Cape Town (UCT)
-and the South African Astronomical Observatory (SAAO). We would like to also thank the exellent developers of the RASCAL and ASPIRED packages.
-
+Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams within the BlackGEM and MeerLICHT consortia, The University of Cape Town (UCT) and the South African Astronomical Observatory (SAAO). We would like to also thank the exellent developers of the RASCAL and ASPIRED packages.
 ---
 
 
