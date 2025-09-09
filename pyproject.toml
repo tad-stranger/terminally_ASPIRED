@@ -81,8 +81,8 @@ zarr = "3.0.6"
 zipp = "3.21.0"
 
 # GitHub dependencies
-ASPIRED_74in = { git = "https://github.com/LloydLandsberg/ASPIRED_74in.git" }
-rascal_fork = { git = "https://github.com/LloydLandsberg/rascal_fork.git" }
+ASPIRED_74in = { git = "https://github.com/LloydLandsberg/ASPIRED_74in.git@main", branch = "main"}
+rascal_fork = { git = "https://github.com/LloydLandsberg/rascal_fork.git@main", branch = "main"}
 
 [build-system]
 requires = ["poetry-core"]
