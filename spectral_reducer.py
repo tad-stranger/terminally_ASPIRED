@@ -13,14 +13,16 @@ from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json",
+    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", grating = "7",
                  bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
-                 output_dir_name = None, sky = False):
+                 output_dir_name = None, sky = False, error = False):
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
         self.arc_std_path = Path(std_arc_file)
+        self.grating = grating
         self.show_sky = sky
+        self.show_error = error
         self.smoothing_value = smooth
         self.verbose = verbose
         self.master_bias = None
@@ -312,7 +314,7 @@ class SpectralReductionPipeline:
         self.onedspec.from_twodspec(self.std2d, stype="standard")
 
         cal_cfg = self.config["wavelength_cal"]
-        atlas = self.config["atlas_lines"]
+        atlas = self.config["atlas_lines"][self.grating]
         element = ["CuAr"] * len(atlas)
 
         self.onedspec.find_arc_lines(
@@ -404,12 +406,12 @@ class SpectralReductionPipeline:
         wav = pd.read_csv(wav_path, skiprows=1, names=['wav'])
         flux = pd.read_csv(flux_path, skiprows=1, names=['flux', 'uflux', 'sky'])
 
-        merged = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
-        merged.to_csv(output_dir / f"{object_name}.csv", header=True, index=False)
+        merged = pd.concat([wav, flux['flux'],flux['uflux'], flux['sky']], axis=1)
+        merged.to_csv(output_dir / f"{object_name}_final.csv", header=True, index=False)
 
         # SNID-style space-separated output
-        snid_path = output_dir / f"{object_name}_final.csv"
-        snid_file = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
+        snid_path = output_dir / f"{object_name}_snid.csv"
+        snid_file = pd.concat([wav, flux['flux']], axis=1)
         snid_file.to_csv(snid_path, sep=' ', header=True, index=False)
 
 
@@ -420,8 +422,8 @@ class SpectralReductionPipeline:
 
         # Load y_data
         path = self.output_dir / f"{self.object_name}_final.csv"
-        data = pd.read_csv(path, sep=' ')
-        wav, flux, sky = data.iloc[:, 0] /10, data.iloc[:, 1], data.iloc[:, 2]
+        data = pd.read_csv(path, sep=',')
+        wav, flux, uflux, sky = data.iloc[:, 0] /10, data.iloc[:, 1], data.iloc[:, 2], data.iloc[:, 3]
 
         # Define the line wavelengths and names
         lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 468.6]
@@ -431,7 +433,9 @@ class SpectralReductionPipeline:
         plt.figure(figsize=(12, 6))
         plt.plot(wav, box_smoothing(flux, self.smoothing_value), color='black', linewidth=0.75, label='Final Spectrum')
         if self.show_sky:
-            plt.plot(wav, sky, color='red', label='Sky Flux')
+            plt.plot(wav, sky, color='blue', label='Sky Flux')
+        if self.show_error:
+            plt.plot(wav, uflux, color='red', label='Error')
         plt.yscale('log')
         plt.xlabel("Wavelength (nm)", fontsize=12)
         plt.ylabel("Flux (arb)", fontsize=12)
