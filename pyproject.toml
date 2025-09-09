@@ -5,10 +5,6 @@ description = "CLI for spectral reduction for the SAAO 74 inch using ASPIRED bac
 authors = ["Francois Campher"]
 license = "MIT"
 readme = "README.md"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS independant",
-]
 license-files = ["LICEN[CS]E*"]
 
 [tool.poetry.dependencies]
