@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "terminally_ASPIRED"
-version = "0.1.0"
+version = "0.1.2"
 description = "CLI for spectral reduction for the SAAO 74 inch using ASPIRED backend"
 authors = ["Francois Campher, Lloyd Landsberg"]
 maintainers = ["Francois Campher"]
@@ -9,7 +9,7 @@ readme = "README.md"
 license-files = ["LICEN[CS]E*"]
 
 [tool.poetry.dependencies]
-python = ">=3.11,<3.12"
+python = ">=3.11"
 
 asdf = "4.1.0"
 asdf-astropy = "0.7.1"
