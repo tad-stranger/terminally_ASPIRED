@@ -9,9 +9,28 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
 import warnings
+import sys
 from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
+
+class Tee:
+    """Redirects writes to both console and file"""
+    def __init__(self, logfile, stream = sys.stdout):
+        self.stream = stream
+        self.log = open(logfile, 'w')
+
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+        self.log.write(data)
+        self.log.flush()
+
+    def flush(self):
+        self.stream.flush()
+        self.log.flush()
+
+
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", grating = "7",
                  bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
@@ -558,6 +577,10 @@ class SpectralReductionPipeline:
 
     def run(self):
         self.extract_data()
+        log_path = self.output_dir / f"{self.object_name}_log_file.txt"
+        sys.stdout = Tee(log_path, sys.__stdout__)
+        sys.stderr = Tee(log_path, sys.__stderr__)
+        print(f"Logging everything to {log_path}")
         self.bias_subtract()
         self.write_filelists()
         self.reduce_images()
