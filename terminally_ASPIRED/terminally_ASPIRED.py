@@ -1,5 +1,5 @@
 import argparse
-from spectral_reducer import SpectralReductionPipeline
+from terminally_ASPIRED.spectral_reducer import SpectralReductionPipeline
 
 def main():
     parser = argparse.ArgumentParser(
@@ -12,7 +12,7 @@ def main():
     parser.add_argument("standard_arc", type = str, help = "Path to standard arc FITS file")
     parser.add_argument("--config",
                         type = str,
-                        default = "config_files/defaults.json",
+                        default = "terminally_aspired/config_files/defaults.json",
                         help = "Path to config JSON file (default: config_files/defaults.json)"
                         )
     parser.add_argument("-b", "--bias", type = str, default="", help = "Path to bias directory skip on empty")
@@ -43,7 +43,6 @@ def main():
                                          sky=args.show_sky)
 
     pipeline.run()
-
 
 if __name__ == "__main__":
     main()

@@ -1,19 +1,22 @@
 [tool.poetry]
-name = "terminally_ASPIRED"
-version = "0.1.3"
+name = "terminally-ASPIRED"
+version = "0.1.6"
 description = "CLI for spectral reduction for the SAAO 74 inch using ASPIRED backend"
-authors = ["Francois Campher, Lloyd Landsberg"]
-maintainers = ["Francois Campher"]
+authors = [
+    "Francois Campher <francois@blackgem.org>",
+    "Lloyd Landsberg <lloyd@blackgem.org"
+]
 license = "MIT"
 readme = "README.md"
-license-files = ["LICEN[CS]E*"]
+packages =[{ include = "terminally_ASPIRED"}]
 
 [tool.poetry.dependencies]
-astroscrappy = "1.2.0"
+python = "3.11.*"
+astroscrappy = "*"
+
+[tool.poetry.scripts]
+tA = "terminally_ASPIRED.terminally_ASPIRED:main"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.peotry.scripts]
-mytool = "terminally-ASPIRED.cli:main"
