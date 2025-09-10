@@ -10,7 +10,7 @@ from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
 import warnings
 import sys
-from tkinter import Tk, Label, Entry, Button
+import shutil
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 
@@ -574,6 +574,32 @@ class SpectralReductionPipeline:
         # update in-memory config
         self.config["trim_bounds"] = coords
 
+    def clean_dir(self):
+        """
+        Move all intermediate files to a subdirectory 'temp',
+        leaving only the final products: final.csv, snid.csv, and log file.
+        """
+        temp_dir = self.output_dir / "temp"
+        temp_dir.mkdir(exist_ok=True)
+
+        # Files we want to keep in the main directory
+        final_files = [
+            f"{self.object_name}_final.csv",
+            f"{self.object_name}_snid.csv",
+            f"{self.object_name}_log_file.txt"
+        ]
+
+        for file in self.output_dir.iterdir():
+            # Skip final files and the temp directory itself
+            if file.name in final_files or file == temp_dir:
+                continue
+
+            try:
+                shutil.move(str(file), str(temp_dir / file.name))
+            except Exception as e:
+                print(f"Could not move {file.name}: {e}")
+
+        print(f"Intermediate files moved to {temp_dir}, final products remain in {self.output_dir}")
 
     def run(self):
         self.extract_data()
@@ -590,3 +616,4 @@ class SpectralReductionPipeline:
         self.calibrate_flux()
         self.save_final_spectrum()
         self.plot_final_spectrum()
+        self.clean_dir()
