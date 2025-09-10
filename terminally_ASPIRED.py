@@ -15,7 +15,7 @@ def main():
                         default = "config_files/defaults.json",
                         help = "Path to config JSON file (default: config_files/defaults.json)"
                         )
-    parser.add_argument("-gr", "--grating", type = str, choices = ["7", "6", "13", "custom"],default = "7",
+    parser.add_argument("-gr" ,"--grating", type = str, choices = ["7", "6", "13", "custom"],default = "7",
                         help = "Choose which grating atlas to use. Options: 7, 6, 13, custom")
     parser.add_argument("-b", "--bias", type = str, default="", help = "Path to bias directory skip on empty")
     parser.add_argument("-f", "--flat-field", type = str, default="", help = "Path to flat directory skip on empty")
