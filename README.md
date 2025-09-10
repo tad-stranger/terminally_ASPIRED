@@ -28,7 +28,7 @@ Download or clone this repository, and ensure that you have the following key fi
 - The pipeline class:`spectral_reducer.py`
 - The command-line interface: `terminally_ASPIRED.py`
 - The environment file: `environment.py`
-- The `config_files` directory which should contain both `defaults.json` & `trim_bounds.json`
+- The `config_files` directory which should contain `defaults.json`. This directory can also be populated with your own presets (`my_preset.json`) for particular telescopes or gratings. 
 
 ### Step 2: Set up Conda Environment
 
@@ -157,7 +157,11 @@ Separate settings exist for **science** and **standard** frames.
 
 ---
 ## 📤 Output
+Several output files are created, but there are three main output files that are important:
 
+- `object_name_final.csv` - final fully reduced csv file containing wavelength (Å), flux, flux error, sky flux
+- `object_name_snid.csv` - SNID ready formatted csv file (space-seperated) for quick transient identification
+- `object_name_log_file.txt` - log file containing all terminal output from ASPIRED. If run in verbose mode, you will get all of the useful statistics ASPIRED produces saved in this file. 
 
 ---
 
