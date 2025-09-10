@@ -2,7 +2,8 @@
 name = "terminally_ASPIRED"
 version = "0.1.0"
 description = "CLI for spectral reduction for the SAAO 74 inch using ASPIRED backend"
-authors = ["Francois Campher"]
+authors = ["Francois Campher, Lloyd Landsberg"]
+maintainers = ["Francois Campher"]
 license = "MIT"
 readme = "README.md"
 license-files = ["LICEN[CS]E*"]
@@ -80,9 +81,6 @@ yaml = "0.2.5"
 zarr = "3.0.6"
 zipp = "3.21.0"
 
-# GitHub dependencies
-ASPIRED_74in = { git = "https://github.com/LloydLandsberg/ASPIRED_74in.git@main", branch = "main"}
-rascal_fork = { git = "https://github.com/LloydLandsberg/rascal_fork.git@main", branch = "main"}
 
 [build-system]
 requires = ["poetry-core"]
