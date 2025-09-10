@@ -22,20 +22,30 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 
 ## 📦 Installation
 
-### Step 1: Clone and Download
-Download or clone this repository, and ensure that you have the following key files:
+### Step 1: Create a Virtual Environment
 
-- The pipeline class:`spectral_reducer.py`
-- The command-line interface: `terminally_ASPIRED.py`
-- The environment file: `environment.py`
-- The `config_files` directory which should contain `defaults.json`. This directory can also be populated with your own presets (`my_preset.json`) for particular telescopes or gratings. 
-
-### Step 2: Set up Conda Environment
-
-We recommend using a virtual environment:
 ```bash
-conda env create -f environment.yml
-conda activate terminally_ASPIRED
+python -m venv terminally_ASPIRED
+```
+
+### Step 2: Activate the Virtual Environment
+
+```bash
+source terminally_ASPIRED/bin/activate
+```
+
+### Step 3: Download the package from PyPI
+
+```bash
+pip install --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple \
+            terminally-ASPIRED
+```
+
+### Step 4: Verify the Installation
+
+```bash
+python tA --help
 ```
 
 ---
