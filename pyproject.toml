@@ -80,7 +80,8 @@ wrapt = "1.17.2"
 yaml = "0.2.5"
 zarr = "3.0.6"
 zipp = "3.21.0"
-
+74inch-aspired = "*"
+74inchRascal = "*"
 
 [build-system]
 requires = ["poetry-core"]
