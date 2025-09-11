@@ -1,21 +1,21 @@
 [tool.poetry]
-name = "terminally-ASPIRED"
+name = "terminally-aspired"
 version = "0.1.6"
 description = "CLI for spectral reduction for the SAAO 74 inch using ASPIRED backend"
 authors = [
     "Francois Campher <francois@blackgem.org>",
-    "Lloyd Landsberg <lloyd@blackgem.org"
+    "Lloyd Landsberg <lloyd@blackgem.org>"
 ]
 license = "MIT"
 readme = "README.md"
-packages =[{ include = "terminally_ASPIRED"}]
+packages = [{ include = "terminally_ASPIRED", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "3.11.*"
 astroscrappy = "*"
 
 [tool.poetry.scripts]
-tA = "terminally_ASPIRED.terminally_ASPIRED:main"
+tA = "terminally_ASPIRED.cli:main"
 
 [build-system]
 requires = ["poetry-core"]

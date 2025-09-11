@@ -3,7 +3,8 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 from astropy.io import fits
-from aspired import image_reduction, spectral_reduction
+from terminally_ASPIRED import image_reduction, spectral_reduction
+# from aspired import image_reduction, spectral_reduction
 from astroscrappy import detect_cosmics
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
@@ -13,9 +14,21 @@ from tkinter import Tk, Label, Entry, Button
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="./config_files/defaults.json",
+    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="terminally_ASPIRED/config_files/defaults.json",
                  bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
                  output_dir_name = None, sky = False):
+
+        # Hack to get depreciated pkg_resources to work by tricking it into believing aspired package is present.
+        # alternative is to replace every call to:
+        #   pkg_resources.resource_filename('aspired', ...)
+        # with the corrected:
+        #   from importlib import resources
+        #   filename = resources.files("terminally_aspired.vendor.aspired_forked").joinpath("data/some_file.dat")
+        # Not sure how many calls to pkg_resources there are so went with hacky fix that works ¯\_(ツ)_/¯
+        import sys
+        import terminally_ASPIRED.vendor.aspired_fork as aspired
+        sys.modules['aspired'] = aspired
+
         self.science_path = Path(science_file)
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)

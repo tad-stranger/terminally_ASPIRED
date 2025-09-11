@@ -1,0 +1,1 @@
+from .vendor.aspired_fork import image_reduction, spectral_reduction
