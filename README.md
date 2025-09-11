@@ -21,8 +21,26 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 ---
 
 ## 📦 Installation
+### Recommended download
+create a new venv or conda env to avoid any conflicting dependencies. Package requires python version >=3.11
 
+```bash
+python -m venv ~/.venv/SpectraPipeline
+source ~/.venv/bin/activate
+pip install -i https://test.pypi.org/simple/ terminally-ASPIRED
+```
+or for conda environments
+```bash
+conda create env -n SpectraPipeline
+conda activate SpectraPipeline
+pip install -i https://test.pypi.org/simple/ terminally-ASPIRED
+```
+
+Alternatively follow the following steps making sure to clone the main branch
+
+### Alternative download
 ### Step 1: Clone and Download
+
 Download or clone this repository, and ensure that you have the following key files:
 
 - The pipeline class:`spectral_reducer.py`
@@ -35,7 +53,7 @@ Download or clone this repository, and ensure that you have the following key fi
 We recommend using a virtual environment:
 ```bash
 conda env create -f environment.yml
-conda activate terminally_ASPIRED
+conda activate SpectraPipeline
 ```
 
 ---
@@ -79,7 +97,7 @@ python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fi
 | `--show-sky`         | Show extracted sky spectrum in final plot                            | Off                          |
 
 ### ⚠️ Note on Image Reduction
-Dark frame correction is not implemented. This is because the CCD used on the 1.9m telescope is cryogenically cooled to temperatures around 170 K, rendering the dark current negligible.
+Dark frame correction is not implemented. This is because the CCD used on the 1.9m telescope is cryogenically cooled to temperatures around 170 K, rendering the dark current negligible or even potentially introducing extra noise.
 
 ---
 ## 📤 Output

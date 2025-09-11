@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "terminally-aspired"
-version = "0.2.1"
+version = "0.2.2"
 description = "CLI for spectral reduction for the SAAO 74 inch using ASPIRED backend"
 authors = [
     "Francois Campher <francois@blackgem.org>",
