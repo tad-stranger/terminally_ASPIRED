@@ -12,7 +12,20 @@ packages = [{ include = "terminally_ASPIRED", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "3.11.*"
-astroscrappy = "*"
+
+aproscrappy = ">=1.1"
+astropy = ">=4.3"
+ccdproc = ">=2.3,!=2.4.0"
+kaleido = ">=0.2"
+matplotlib = ">=3.0.3"
+numpy = ">=1.18"
+plotly = ">=5.6"
+pynverse = ">=0.1.4"
+scipy = ">=1.7"
+spectresc = ">=1.0.1"
+specutils = ">=1.8"
+statsmodels = ">=0.13"
+tqdm = ">=4.48.0"
 
 [tool.poetry.scripts]
 tA = "terminally_ASPIRED.cli:main"

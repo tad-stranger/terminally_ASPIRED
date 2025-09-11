@@ -1,20 +1,19 @@
 import argparse
 from terminally_ASPIRED.spectral_reducer import SpectralReductionPipeline
-
+from importlib import resources
 def main():
+
     parser = argparse.ArgumentParser(
         description="Run ASPIRED spectral reduction pipeline for 1.9m SAAO data."
     )
-
     parser.add_argument("science", type = str, help = "Path to science FITS file")
     parser.add_argument("arc", type = str, help = "Path to Arc FITS file")
     parser.add_argument("standard", type = str, help = "Path to standard FITS file")
     parser.add_argument("standard_arc", type = str, help = "Path to standard arc FITS file")
     parser.add_argument("--config",
                         type = str,
-                        default = "terminally_aspired/config_files/defaults.json",
-                        help = "Path to config JSON file (default: config_files/defaults.json)"
-                        )
+                        default = "",
+                        help = "Path to config JSON file ")
     parser.add_argument("-b", "--bias", type = str, default="", help = "Path to bias directory skip on empty")
     parser.add_argument("-f", "--flat-field", type = str, default="", help = "Path to flat directory skip on empty")
     parser.add_argument("-t","--interactive-trim", action = "store_true", help = "Enables interactive trim of science images")

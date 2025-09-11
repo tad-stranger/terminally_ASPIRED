@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
 import warnings
-from tkinter import Tk, Label, Entry, Button
+from importlib import resources
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
 class SpectralReductionPipeline:
@@ -51,8 +51,11 @@ class SpectralReductionPipeline:
             self.flat_folder = Path("DO_NOT_USE_FLATS")
         else:
             self.flat_folder = Path(flat_path)
-
-        self.config = self._load_config(config_path)
+        if config_path == "":
+            with resources.open_text("terminally_ASPIRED.config_files", "defaults.json") as f:
+                self.config = json.load(f)
+        else:
+            self.config = self._load_config(config_path)
 
         self.show_plots = show_plots
         self.config["display_plots"] = show_plots
