@@ -27,13 +27,17 @@ create a new venv or conda env to avoid any conflicting dependencies. Package re
 ```bash
 python -m venv ~/.venv/SpectraPipeline
 source ~/.venv/bin/activate
-pip install -i https://test.pypi.org/simple/ terminally-ASPIRED
+pip install --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple \
+            terminally-ASPIRED
 ```
 or for conda environments
 ```bash
 conda create env -n SpectraPipeline
 conda activate SpectraPipeline
-pip install -i https://test.pypi.org/simple/ terminally-ASPIRED
+pip install --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple \
+            terminally-ASPIRED
 ```
 
 Alternatively follow the following steps making sure to clone the main branch
