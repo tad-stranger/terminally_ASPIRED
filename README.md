@@ -25,34 +25,35 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 ### Step 1: Create a Virtual Environment
 
 ```bash
-python -m venv terminally_ASPIRED
+python3 -m venv ~/.venv/terminally_ASPIRED
 ```
 
 ### Step 2: Activate the Virtual Environment
 
 ```bash
-source terminally_ASPIRED/bin/activate
+source ~/.venv/terminally_ASPIRED/bin/activate
 ```
 
 ### Step 3: Download the package from PyPI
 
 ```bash
+pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
 pip install --index-url https://test.pypi.org/simple/ \
-            --extra-index-url https://pypi.org/simple \
-            terminally-ASPIRED
+    --extra-index-url https://pypi.org/simple \
+    terminally-ASPIRED
 ```
 
 ### Step 4: Verify the Installation
 
 ```bash
-python tA --help
+tA --help
 ```
 
 ---
 ## 🚀 CLI Usage
 ### Basic Usage 
 ```bash
-python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fits
+tA science.fits arc.fits standard.fits standard_arc.fits -gr 7 -f flat_dir -b bias_dir
 ```
 ### ⚙️ Required Arguments
 | Argument            | Description                                                        |
