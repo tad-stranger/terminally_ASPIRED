@@ -22,6 +22,8 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 
 ## 📦 Installation
 
+### Python venv 🫙
+
 ### Step 1: Create a Virtual Environment
 
 ```bash
@@ -48,6 +50,37 @@ pip install --index-url https://test.pypi.org/simple/ \
 ```bash
 tA --help
 ```
+
+## Conda environment 🐍
+
+### Step 1: Create a Virtual Environment
+
+```bash
+conda create env -n terminally_ASPIRED
+```
+
+### Step 2: Activate the Virtual Environment
+
+```bash
+conda activate terminally_ASPIRED
+```
+
+### Step 3: Download the package from PyPI
+
+```bash
+pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
+pip install --index-url https://test.pypi.org/simple/ \
+    --extra-index-url https://pypi.org/simple \
+    terminally-ASPIRED
+```
+
+### Step 4: Verify the Installation
+
+```bash
+tA --help
+```
+
+
 
 ---
 ## 🚀 CLI Usage
