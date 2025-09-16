@@ -88,7 +88,7 @@ Key sections include:
 ## 🚀 CLI Usage
 ### Basic Usage 
 ```bash
-python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fits
+tA science.fits arc.fits standard.fits standard_arc.fits
 ```
 ### ⚙️ Required Arguments
 | Argument            | Description                                          |
