@@ -31,7 +31,9 @@ conda create -n SpectraPipeline python=3.11
 conda activate SpectraPipeline
 ```
 ```bash
-pip install -i https://test.pypi.org/simple/ terminally-aspired
+pip install --index-url https://test.pypi.org/simple/ \
+    --extra-index-url https://pypi.org/simple \
+    terminally-ASPIRED
 ```
 
 
