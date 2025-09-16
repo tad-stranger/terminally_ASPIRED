@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "terminally-aspired"
-version = "0.2.7"
+version = "0.3.2"
 description = "CLI for spectral reduction for the SAAO 74 inch using ASPIRED backend"
 authors = [
     "Francois Campher <francois@blackgem.org>",
@@ -31,6 +31,7 @@ tqdm = ">=4.48.0"
 
 [tool.poetry.scripts]
 tA = "terminally_ASPIRED.cli:main"
+terminally-aspired = "terminally_ASPIRED.cli:main"
 
 [build-system]
 requires = ["poetry-core"]

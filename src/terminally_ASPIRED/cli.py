@@ -1,6 +1,6 @@
 import argparse
 from terminally_ASPIRED.spectral_reducer import SpectralReductionPipeline
-from importlib import resources
+
 def main():
 
     parser = argparse.ArgumentParser(

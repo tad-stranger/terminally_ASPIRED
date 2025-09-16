@@ -25,6 +25,12 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 create a new venv or conda env to avoid any conflicting dependencies. Package requires python version >=3.11
 
 ```bash
+conda create env -n SpectraPipeline python=3.11
+conda activate SpectraPipeline
+pip install -i https://test.pypi.org/simple/ terminally-aspired
+```
+or a venv (ensure python version >= 3.11)
+```bash
 python3 -m venv ~/.venv/SpectraPipeline
 source ~/.venv/bin/activate
 pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
@@ -32,22 +38,13 @@ pip install --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple \
     terminally-ASPIRED
 ```
-or for conda environments
-```bash
-conda create env -n SpectraPipeline
-conda activate SpectraPipeline
-pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
-pip install --index-url https://test.pypi.org/simple/ \
-    --extra-index-url https://pypi.org/simple \
-    terminally-ASPIRED
-```
 
-Alternatively follow the following steps making sure to clone the main branch
+Alternatively, follow the following steps making sure to clone the main branch
 
 ### Alternative download
 ### Step 1: Clone and Download
 
-Download or clone this repository, and ensure that you have the following key files:
+Download or clone this repository and ensure that you have the following key files:
 
 - The pipeline class:`spectral_reducer.py`
 - The command-line interface: `terminally_ASPIRED.py`
@@ -115,7 +112,7 @@ This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally
 
 ---
 ## ☄️Acknowledgements
-Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams within the BlackGEM and MeerLICHT consortia, The University of Cape Town (UCT) and the South African Astronomical Observatory (SAAO). We would like to also thank the exellent developers of the RASCAL and ASPIRED packages.
+Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams within the BlackGEM and MeerLICHT consortia, The University of Cape Town (UCT) and the South African Astronomical Observatory (SAAO). We would like to also thank the excellent developers of the RASCAL and ASPIRED packages.
 
 ---
 

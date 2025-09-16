@@ -18,8 +18,8 @@ class SpectralReductionPipeline:
                  bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
                  output_dir_name = None, sky = False):
 
-        # Hack to get depreciated pkg_resources to work by tricking it into believing aspired package is present.
-        # alternative is to replace every call to:
+        # Hack to get depreciated pkg_resources to work by tricking it into believing the aspired package is present.
+        # an alternative is to replace every call to:
         #   pkg_resources.resource_filename('aspired', ...)
         # with the corrected:
         #   from importlib import resources
@@ -126,21 +126,21 @@ class SpectralReductionPipeline:
         else:
             self._trim_raw_data()
 
-        # Load and trim bias frames (if bias folder is set and exists)
+        # Load and trim bias frames (if the bias folder is set and exists)
         if self.bias_folder != Path("DO_NOT_USE_BIAS"):
             bias_files = sorted(self.bias_folder.glob("*.fits"))
             self.bias_data_list = []
             for bf in bias_files:
                 data, header = fits.getdata(bf, header=True)
                 data = np.flip(data, axis=1)
-                # Trim using same bounds
+                # Trim using the same bounds
                 data = data[
                        self.config["trim_bounds"]["y_min"]:self.config["trim_bounds"]["y_max"],
                        self.config["trim_bounds"]["x_min"]:self.config["trim_bounds"]["x_max"]
                        ]
                 self.bias_data_list.append(data)
 
-        # Load and trim flat frames (if flat folder is set and exists)
+        # Load and trim flat frames (if a flat folder is set and exists)
         if self.flat_folder != Path("DO_NOT_USE_FLATS"):
             flat_files = sorted(self.flat_folder.glob("*.fits"))
             self._original_flat_files = flat_files # Keep for later saving
@@ -148,7 +148,7 @@ class SpectralReductionPipeline:
             for ff in flat_files:
                 data, header = fits.getdata(ff, header=True)
                 data = np.flip(data, axis=1)
-                # Trim using same bounds
+                # Trim using the same bounds
                 data = data[
                        self.config["trim_bounds"]["y_min"]:self.config["trim_bounds"]["y_max"],
                        self.config["trim_bounds"]["x_min"]:self.config["trim_bounds"]["x_max"]
@@ -199,7 +199,7 @@ class SpectralReductionPipeline:
                 subtracted_flat = np.nan_to_num(subtracted_flat, nan=0.0)
                 subtracted_flat[subtracted_flat < 0] = 0.0
 
-                # Save cleaned flat with original filename
+                # Save cleaned flat with the original filename
                 flat_files = sorted(self.flat_folder.glob("*.fits"))
                 out_path = bias_flat_dir / flat_files[i].name
                 fits.writeto(out_path, subtracted_flat.astype(np.float32), overwrite=True)
@@ -404,7 +404,7 @@ class SpectralReductionPipeline:
         output_dir = self.output_dir
         object_name = self.object_name
 
-        # Save just wavelength + flux
+        # Save just wavelength and flux
         self.onedspec.save_csv(
             stype='science',
             spec_id=0,
@@ -455,7 +455,7 @@ class SpectralReductionPipeline:
         # Plot vertical lines and labels
         for line_wav, name in zip(lines, line_names):
             if wav.min() < line_wav < wav.max():
-                # Find nearest index for labeling height
+                # Find the nearest index for labeling height
                 idx = (np.abs(wav - line_wav)).argmin()
                 y = flux.iloc[idx]
                 plt.axvline(line_wav, color='blue', linestyle='--', alpha=0.5)
