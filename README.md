@@ -31,6 +31,7 @@ conda create -n SpectraPipeline python=3.11
 conda activate SpectraPipeline
 ```
 ```bash
+pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
 pip install --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple \
     terminally-ASPIRED
