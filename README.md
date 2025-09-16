@@ -25,7 +25,7 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 Create a new venv or conda env to avoid any conflicting dependencies. Package requires python version >=3.11
 
 ```bash
-conda create env -n SpectraPipeline python=3.11
+conda create -n SpectraPipeline python=3.11
 ```
 ```bash
 conda activate SpectraPipeline
