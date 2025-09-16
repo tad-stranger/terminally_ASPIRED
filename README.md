@@ -32,11 +32,8 @@ conda activate SpectraPipeline
 ```
 ```bash
 pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
-pip install --index-url https://test.pypi.org/simple/ \
-    --extra-index-url https://pypi.org/simple \
-    terminally-ASPIRED
+pip install pip install terminally-aspired
 ```
-
 
 or a venv (ensure python version >= 3.11)
 
@@ -48,9 +45,7 @@ source ~/.venv/bin/activate
 ```
 ```bash
 pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
-pip install --index-url https://test.pypi.org/simple/ \
-    --extra-index-url https://pypi.org/simple \
-    terminally-ASPIRED
+pip install pip install terminally-aspired
 ```
 
 Alternatively, follow the following steps making sure to clone the main branch
