@@ -36,7 +36,7 @@ class Tee:
 class SpectralReductionPipeline:
     def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", grating = "7",
                  bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
-                 output_dir_name = None, sky = False):
+                 output_dir_name = None, sky = False, error = False):
 
         # Hack to get depreciated pkg_resources to work by tricking it into believing the aspired package is present.
         # an alternative is to replace every call to:
