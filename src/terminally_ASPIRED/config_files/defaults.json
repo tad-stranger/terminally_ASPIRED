@@ -11,10 +11,8 @@
         "sigfrac": 0.3,
         "objlim": 5.0
     },
-    "atlas_lines": [
-        4198.317,
-        4277.5282,
-        4764.8646,
+    "atlas_lines": {
+        "7" : [4198.317,
         6965.43,
         7067.2181,
         7383.9805,
@@ -22,16 +20,24 @@
         7635.11,
         7724.2072,
         8006.1567,
-        8115.31
-    ],
+        8115.31],
+        "6": [4545.0520,4579.35,4609.5670,4657.901,
+            4764.8650, 4806.0210,4879.8640,
+            4965.0800, 5495.8740, 5558.7020, 5606.7330,
+            5888.5840, 5912.0850,
+            6032.1270, 6043.2330,
+            6114.9230, 6172.2778,
+            6416.3070, 6677.2822, 6752.8330],
+        "13": [],
+        "custom":[]},
     "standard_name": "ltt6248",
     "trace_kwargs": {
         "science": {
             "nspec": 1,
             "nwindow": 20,
-            "trace_width": 3,
+            "trace_width": 5,
             "resample_factor": 2,
-            "fit_deg": 3,
+            "fit_deg": 2,
             "display": false,
             "width": 1024,
             "height": 1024
@@ -77,11 +83,11 @@
     },
     "wavelength_cal": {
         "science": {
-            "prominence": 16,
+            "prominence": 25,
             "refine": true,
-            "ransac_minimum_matches": 8,
+            "ransac_minimum_matches": 7,
             "fit_max_tries": 5000,
-            "fit_deg": 3,
+            "fit_deg": 2,
             "fit_type": "poly"
         },
         "standard": {

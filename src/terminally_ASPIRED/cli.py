@@ -13,7 +13,10 @@ def main():
     parser.add_argument("--config",
                         type = str,
                         default = "",
-                        help = "Path to config JSON file ")
+                        help = "Path to config JSON file (default: config_files/defaults.json)"
+                        )
+    parser.add_argument("-gr" ,"--grating", type = str, choices = ["7", "6", "13", "custom"],default = "7",
+                        help = "Choose which grating atlas to use. Options: 7, 6, 13, custom")
     parser.add_argument("-b", "--bias", type = str, default="", help = "Path to bias directory skip on empty")
     parser.add_argument("-f", "--flat-field", type = str, default="", help = "Path to flat directory skip on empty")
     parser.add_argument("-t","--interactive-trim", action = "store_true", help = "Enables interactive trim of science images")
@@ -23,6 +26,7 @@ def main():
     parser.add_argument("--no-warnings", action = "store_true", help = "Disables warnings")
     parser.add_argument("-O", "--output-dir",type= str, default= None, help="Specify output directory name. Default is object name from fits header")
     parser.add_argument("--show-sky", action="store_true", help = "Show sky flux on final image")
+    parser.add_argument("--show-error", action = "store_true", help = "Show flux error on final image")
     args = parser.parse_args()
 
     # Run Pipeline
@@ -31,6 +35,7 @@ def main():
                                          std_file=args.standard,
                                          std_arc_file=args.standard_arc,
                                          config_path=args.config,
+                                         grating = args.grating,
                                          bias_path=args.bias,
                                          flat_path=args.flat_field,
                                          interactive_trim = args.interactive_trim,
@@ -39,7 +44,8 @@ def main():
                                          verbose=args.verbose,
                                          no_warnings=args.no_warnings,
                                          output_dir_name=args.output_dir,
-                                         sky=args.show_sky)
+                                         sky=args.show_sky,
+                                         error = args.show_error)
 
     pipeline.run()
 

@@ -10,11 +10,31 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from matplotlib.widgets import RectangleSelector
 import warnings
+import sys
+import shutil
 from importlib import resources
 
 # This is a class of my 1.9M pipeline to be used to make terminally_ASPIRED
+
+class Tee:
+    """Redirects writes to both console and file"""
+    def __init__(self, logfile, stream = sys.stdout):
+        self.stream = stream
+        self.log = open(logfile, 'w')
+
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+        self.log.write(data)
+        self.log.flush()
+
+    def flush(self):
+        self.stream.flush()
+        self.log.flush()
+
+
 class SpectralReductionPipeline:
-    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="terminally_ASPIRED/config_files/defaults.json",
+    def __init__(self, science_file, arc_file, std_file, std_arc_file, config_path="config_files/defaults.json", grating = "7",
                  bias_path = None, flat_path = None, interactive_trim = False ,show_plots = False, smooth = 1, verbose = False, no_warnings = True,
                  output_dir_name = None, sky = False):
 
@@ -33,7 +53,9 @@ class SpectralReductionPipeline:
         self.arc_path = Path(arc_file)
         self.std_path = Path(std_file)
         self.arc_std_path = Path(std_arc_file)
+        self.grating = grating
         self.show_sky = sky
+        self.show_error = error
         self.smoothing_value = smooth
         self.verbose = verbose
         self.master_bias = None
@@ -328,7 +350,7 @@ class SpectralReductionPipeline:
         self.onedspec.from_twodspec(self.std2d, stype="standard")
 
         cal_cfg = self.config["wavelength_cal"]
-        atlas = self.config["atlas_lines"]
+        atlas = self.config["atlas_lines"][self.grating]
         element = ["CuAr"] * len(atlas)
 
         self.onedspec.find_arc_lines(
@@ -420,12 +442,12 @@ class SpectralReductionPipeline:
         wav = pd.read_csv(wav_path, skiprows=1, names=['wav'])
         flux = pd.read_csv(flux_path, skiprows=1, names=['flux', 'uflux', 'sky'])
 
-        merged = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
-        merged.to_csv(output_dir / f"{object_name}.csv", header=True, index=False)
+        merged = pd.concat([wav, flux['flux'],flux['uflux'], flux['sky']], axis=1)
+        merged.to_csv(output_dir / f"{object_name}_final.csv", header=True, index=False)
 
         # SNID-style space-separated output
-        snid_path = output_dir / f"{object_name}_final.csv"
-        snid_file = pd.concat([wav, flux['flux'], flux['sky']], axis=1)
+        snid_path = output_dir / f"{object_name}_snid.csv"
+        snid_file = pd.concat([wav, flux['flux']], axis=1)
         snid_file.to_csv(snid_path, sep=' ', header=True, index=False)
 
 
@@ -436,8 +458,8 @@ class SpectralReductionPipeline:
 
         # Load y_data
         path = self.output_dir / f"{self.object_name}_final.csv"
-        data = pd.read_csv(path, sep=' ')
-        wav, flux, sky = data.iloc[:, 0] /10, data.iloc[:, 1], data.iloc[:, 2]
+        data = pd.read_csv(path, sep=',')
+        wav, flux, uflux, sky = data.iloc[:, 0] /10, data.iloc[:, 1], data.iloc[:, 2], data.iloc[:, 3]
 
         # Define the line wavelengths and names
         lines = [656.279, 486.135, 434.0472, 397.0075, 388.9064, 383.5397, 420, 468.6]
@@ -447,7 +469,9 @@ class SpectralReductionPipeline:
         plt.figure(figsize=(12, 6))
         plt.plot(wav, box_smoothing(flux, self.smoothing_value), color='black', linewidth=0.75, label='Final Spectrum')
         if self.show_sky:
-            plt.plot(wav, sky, color='red', label='Sky Flux')
+            plt.plot(wav, sky, color='blue', label='Sky Flux')
+        if self.show_error:
+            plt.plot(wav, uflux, color='red', label='Error')
         plt.yscale('log')
         plt.xlabel("Wavelength (nm)", fontsize=12)
         plt.ylabel("Flux (arb)", fontsize=12)
@@ -567,9 +591,39 @@ class SpectralReductionPipeline:
         # update in-memory config
         self.config["trim_bounds"] = coords
 
+    def clean_dir(self):
+        """
+        Move all intermediate files to a subdirectory 'temp',
+        leaving only the final products: final.csv, snid.csv, and log file.
+        """
+        temp_dir = self.output_dir / "temp"
+        temp_dir.mkdir(exist_ok=True)
+
+        # Files we want to keep in the main directory
+        final_files = [
+            f"{self.object_name}_final.csv",
+            f"{self.object_name}_snid.csv",
+            f"{self.object_name}_log_file.txt"
+        ]
+
+        for file in self.output_dir.iterdir():
+            # Skip final files and the temp directory itself
+            if file.name in final_files or file == temp_dir:
+                continue
+
+            try:
+                shutil.move(str(file), str(temp_dir / file.name))
+            except Exception as e:
+                print(f"Could not move {file.name}: {e}")
+
+        print(f"Intermediate files moved to {temp_dir}, final products remain in {self.output_dir}")
 
     def run(self):
         self.extract_data()
+        log_path = self.output_dir / f"{self.object_name}_log_file.txt"
+        sys.stdout = Tee(log_path, sys.__stdout__)
+        sys.stderr = Tee(log_path, sys.__stderr__)
+        print(f"Logging everything to {log_path}")
         self.bias_subtract()
         self.write_filelists()
         self.reduce_images()
@@ -579,3 +633,4 @@ class SpectralReductionPipeline:
         self.calibrate_flux()
         self.save_final_spectrum()
         self.plot_final_spectrum()
+        self.clean_dir()
