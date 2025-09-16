@@ -142,7 +142,7 @@ class SpectralReductionPipeline:
 
 
         # Trim Raw files
-        if self.interactive_trim == True:
+        if self.interactive_trim:
             self.interactive_trim_function(tag = "science")
             self._trim_raw_data()
         else:
@@ -479,7 +479,7 @@ class SpectralReductionPipeline:
         # Plot vertical lines and labels
         for line_wav, name in zip(lines, line_names):
             if wav.min() < line_wav < wav.max():
-                # Find the nearest index for labeling height
+                # Find the nearest index for labelling height
                 idx = (np.abs(wav - line_wav)).argmin()
                 y = flux.iloc[idx]
                 plt.axvline(line_wav, color='blue', linestyle='--', alpha=0.5)
