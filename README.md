@@ -1,10 +1,10 @@
 <h1>
-  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="60" style="vertical-align: middle; margin-right: 12px;">
+  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="881" style="vertical-align: middle; margin-right: 12px;">
   terminally_ASPIRED
 </h1>
 
 
- A customizable, command-line-driven spectral reduction pipeline built around the [ASPIRED](https://github.com/cylammarco/ASPIRED) framework — tailored for data from the **SpUpNIC spectrograph** on the **SAAO 1.9m telescope**.
+ A customisable, command-line-driven spectral reduction pipeline built around the [ASPIRED](https://github.com/cylammarco/ASPIRED) framework — tailored for data from the **SpUpNIC spectrograph** on the **SAAO 1.9m telescope**.
 Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robust automation with fine-grained user control via configuration files and interactive tools.
 ---
 
@@ -22,7 +22,7 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 
 ## 📦 Installation
 ### Recommended download
-create a new venv or conda env to avoid any conflicting dependencies. Package requires python version >=3.11
+Create a new venv or conda env to avoid any conflicting dependencies. Package requires python version >=3.11
 
 ```bash
 conda create env -n SpectraPipeline python=3.11
@@ -65,7 +65,7 @@ This file controls all pipeline behaviour.
 Key sections include:
 - **Trimming Bounds**(`trim_bounds`): pixel coordinates for cropping the 2D image
 - **Cosmic ray cleaning**(`cosmic_ray`): parameters passed to AstroScrappy
-- **Arc line atals**(`arc_lines`): wavelengths for calibration.
+- **Arc line atlas**(`arc_lines`): wavelengths for calibration.
 - **Extraction parameters**(`extract_kwargs`): per-object optimal extraction.
 - **Tracing config**(`trace_kwargs`): for locating spectrum traces.
 - **Wavelength solution fitting** (`wavelength_cal`, `hough`)
@@ -78,7 +78,7 @@ python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fi
 ```
 ### ⚙️ Required Arguments
 | Argument            | Description                                          |
-| ------------------- | ---------------------------------------------------- |
+|---------------------|------------------------------------------------------|
 | `science.fits`      | Path to the science target FITS file                 |
 | `arc.fits`          | Path to the arc lamp FITS file for the science frame |
 | `standard.fits`     | Path to the standard star FITS file                  |
@@ -86,21 +86,21 @@ python terminally_ASPIRED.py science.fits arc.fits standard.fits standard_arc.fi
 
 
 ### 🛠️ Optional Arguments
-| Flag                 | Description                                                          | Default                      |
-| -------------------- | -------------------------------------------------------------------- | ---------------------------- |
-| `--config`           | Path to JSON config file                                             | `config_files/defaults.json` |
-| `-b`, `--bias`       | Path to directory with bias frames (skip if empty)                   | `""`                         |
-| `-f`, `--flat-field` | Path to directory with flat fields (skip if empty)                   | `""`                         |
-| `-t`,`--interactive-trim` | Enable interactive trimming of 2D spectra                            | Off                     |
-| `--show-plots`       | Show intermediate plots during reduction                             | Off                          |
-| `-s`, `--smooth`     | Smoothing box size for final 1D spectrum                             | `1` (no smoothing)           |
-| `-v`, `--verbose`    | Enable verbose output                                                | Off                          |
-| `--no-warnings`      | Suppress warning messages                                            | Off                          |
-| `-O`, `--output-dir` | Custom output directory name (default: object name from FITS header) | `None`                       |
-| `--show-sky`         | Show extracted sky spectrum in final plot                            | Off                          |
+| Flag                      | Description                                                          | Default                      |
+|---------------------------|----------------------------------------------------------------------|------------------------------|
+| `--config`                | Path to JSON config file                                             | `config_files/defaults.json` |
+| `-b`, `--bias`            | Path to directory with bias frames (skip if empty)                   | `""`                         |
+| `-f`, `--flat-field`      | Path to directory with flat fields (skip if empty)                   | `""`                         |
+| `-t`,`--interactive-trim` | Enable interactive trimming of 2D spectra                            | Off                          |
+| `--show-plots`            | Show intermediate plots during reduction                             | Off                          |
+| `-s`, `--smooth`          | Smoothing box size for final 1D spectrum                             | `1` (no smoothing)           |
+| `-v`, `--verbose`         | Enable verbose output                                                | Off                          |
+| `--no-warnings`           | Suppress warning messages                                            | Off                          |
+| `-O`, `--output-dir`      | Custom output directory name (default: object name from FITS header) | `None`                       |
+| `--show-sky`              | Show extracted sky spectrum in final plot                            | Off                          |
 
 ### ⚠️ Note on Image Reduction
-Dark frame correction is not implemented. This is because the CCD used on the 1.9m telescope is cryogenically cooled to temperatures around 170 K, rendering the dark current negligible or even potentially introducing extra noise.
+Dark frame correction is not implemented. This is because the CCD used on the 1.9 m telescope is cryogenically cooled to temperatures around 170 K, rendering the dark current negligible or even potentially introducing extra noise.
 
 ---
 ## 📤 Output
@@ -108,7 +108,7 @@ Dark frame correction is not implemented. This is because the CCD used on the 1.
 ---
 
 ## 🧪 Developer Notes
-This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally_ASPIRED wraps its lower-level functionality to streamline workflows, reduce bugs, and standardize output for further scientific use.
+This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally_ASPIRED wraps its lower-level functionality to streamline workflows, reduce bugs, and standardise output for further scientific use.
 
 ---
 ## ☄️Acknowledgements
