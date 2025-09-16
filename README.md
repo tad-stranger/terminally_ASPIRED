@@ -25,14 +25,28 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 Create a new venv or conda env to avoid any conflicting dependencies. Package requires python version >=3.11
 
 ```bash
-conda create env -n SpectraPipeline python=3.11
-conda activate SpectraPipeline
-pip install -i https://test.pypi.org/simple/ terminally-aspired
+conda create -n SpectraPipeline python=3.11
 ```
+```bash
+conda activate SpectraPipeline
+```
+```bash
+pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
+pip install --index-url https://test.pypi.org/simple/ \
+    --extra-index-url https://pypi.org/simple \
+    terminally-ASPIRED
+```
+
+
 or a venv (ensure python version >= 3.11)
+
 ```bash
 python3 -m venv ~/.venv/SpectraPipeline
+```
+```bash
 source ~/.venv/bin/activate
+```
+```bash
 pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
 pip install --index-url https://test.pypi.org/simple/ \
     --extra-index-url https://pypi.org/simple \
