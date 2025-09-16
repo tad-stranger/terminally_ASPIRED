@@ -1,5 +1,5 @@
 <h1>
-  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="881" style="vertical-align: middle; margin-right: 12px;">
+  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="60" style="vertical-align: middle; margin-right: 12px;">
   terminally_ASPIRED
 </h1>
 
