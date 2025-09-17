@@ -10,9 +10,9 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 
 ## ✨ Features
 
-- Optional **bias and flat field correction**
-- Fully configurable via a `defaults.json` file
+- Fully configurable via a `config.json` file
 - Interactive 2D trimming and live preview of spectrum extraction
+- Includes **wavelength atlas** for gratings 6 and 7 on the 1.9m
 - Custom **wavelength calibration** with user-defined atlas lines
 - Built-in flux calibration and sensitivity inspection
 - CLI wrapper for fast processing with reproducible configuration
@@ -20,74 +20,92 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 
 ---
 
-## 📦 Installation
+## 📦 Installation and Setup
 
-### Python venv 🫙
 
-### Step 1: Create a Virtual Environment
+### Reccomended: Conda environment 🐍
 
-```bash
-python3 -m venv ~/.venv/terminally_ASPIRED
-```
-
-### Step 2: Activate the Virtual Environment
+#### Step 1: Create a Virtual Environment
 
 ```bash
-source ~/.venv/terminally_ASPIRED/bin/activate
+conda create -n terminally_ASPIRED python=3.11
 ```
 
-### Step 3: Download the package from PyPI
-
-```bash
-pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
-pip install --index-url https://test.pypi.org/simple/ \
-    --extra-index-url https://pypi.org/simple \
-    terminally-ASPIRED
-```
-
-### Step 4: Verify the Installation
-
-```bash
-tA --help
-```
-
-## Conda environment 🐍
-
-### Step 1: Create a Virtual Environment
-
-```bash
-conda create env -n terminally_ASPIRED
-```
-
-### Step 2: Activate the Virtual Environment
+#### Step 2: Activate the Virtual Environment
 
 ```bash
 conda activate terminally_ASPIRED
 ```
 
-### Step 3: Download the package from PyPI
+#### Step 3: Download the package from PyPI
 
 ```bash
 pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
-pip install --index-url https://test.pypi.org/simple/ \
-    --extra-index-url https://pypi.org/simple \
-    terminally-ASPIRED
+pip install terminally-aspired
 ```
 
-### Step 4: Verify the Installation
+#### Step 4: Verify the Installation
 
 ```bash
 tA --help
 ```
 
+#### Step 5: Copy `defaults.json` as template and save in working directory 
 
+The main way you will interact with terminally_ASPIRED is thorugh the config `.json` file, so you should copy the `defaults.json` file to use as a template and rename it to whatever is convienient. 
+You can use a built-in function in terminally_ASPIRED to do this: 
+```bash
+make-config -n name_of_config_file -O directory_to_store_config
+```
+This will create a copy of the defaults.json file and rename it to what you choose as well as save it to a output directory of your choice. Then when calling terminally_ASPIRED, you can point to your own config file by making use of the `--config` argument. 
+
+
+### Alternative: Python venv 🫙
+
+#### Step 1: Create a Virtual Environment (Ensure that python >= 3.11)
+If you wish to use a python venv, than make sure that the python version on your device is >= 3.11
+```bash
+python3 -m venv ~/.venv/terminally_ASPIRED
+```
+
+#### Step 2: Activate the Virtual Environment
+
+```bash
+source ~/.venv/terminally_ASPIRED/bin/activate
+```
+
+#### Step 3: Download the package from PyPI
+
+```bash
+pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
+pip install pip install terminally-aspired
+```
+
+#### Step 4: Verify the Installation
+
+To make sure that the package installed correctly, run the --help argument. It sometimes takes a few minutes to run on a fresh install.
+```bash
+tA --help
+```
+
+
+#### Step 5: Copy `defaults.json` as template and save in working directory 
+
+The main way you will interact with terminally_ASPIRED is thorugh the config `.json` file, so you should copy the `defaults.json` file to use as a template and rename it to whatever is convienient. 
+You can use a built-in function in terminally_ASPIRED to do this: 
+```bash
+make-config -n name_of_config_file -O directory_to_store_config
+```
+This will create a copy of the defaults.json file and rename it to what you choose as well as save it to a output directory of your choice. Then when calling terminally_ASPIRED, you can point to your own config file by making use of the `--config` argument. 
 
 ---
 ## 🚀 CLI Usage
 ### Basic Usage 
 ```bash
-tA science.fits arc.fits standard.fits standard_arc.fits -gr 7 -f flat_dir -b bias_dir
+tA science.fits arc.fits standard.fits standard_arc.fits -gr 7 -f flat_dir -b bias_dir --config path/to/config.json
 ```
+This will call terminally_ASPIRED and reduce the science.fits file for data from grating 7. This will work well once you have gotten some settings in the config files just right for this particular set of data.
+
 ### ⚙️ Required Arguments
 | Argument            | Description                                                        |
 | ------------------- | ----------------------------------------------------               |
@@ -115,6 +133,31 @@ tA science.fits arc.fits standard.fits standard_arc.fits -gr 7 -f flat_dir -b bi
 
 ### ⚠️ Note on Image Reduction
 Dark frame correction is not implemented. This is because the CCD used on the 1.9m telescope is cryogenically cooled to temperatures around 170 K, rendering the dark current negligible.
+
+---
+## 🪁Example - First time reduction with a new set of data
+
+Often, when you have a fresh set of data you will need to carefully monitor how the pipeline deals with trace extraction & wavelength and flux calibration. Therefore for a first run with new data we reccomend to make use of the `--show-plots` argument which will show you the ASPIRED intermediate plots. 
+
+### Step 1: Stadard Star name in `config.json`
+
+Remeber to input your standard star name in lower case letters into your `config.json` file under the parameter `standard_name` (examples: hilt600, ltt6248 etc)
+
+### Step 2: Run the pipeline with `--show-plots` enabled
+
+```bash
+tA science.fits arc.fits standard.fits standard_arc.fits -gr 7 -f flat_dir -b bias_dir --config path/to/config.json --show-plots
+```
+
+### Step 3: Wavelength Calibration 
+A particular sticky point is typically wavelength calibration, due to the way in which the auto-detection of the peaks of the arc spectrum works. You can control the wavelength calibration in the `config.json` file, located under the header and  `wavelength_cal`. In particular you need to pay attention to the `prominance` parameter. This sets the level of relative flux above which the auto-peak detection will detect peaks in the arc spectrum. You must make sure that the `prominance` level is such that the peaks that are auto detected match up with the peaks within the wavelength atlas of the chosen grating. You can find the wavelength atlasses for the different grating on the [SAAO SpUpNIC TOPS Wiki](https://topswiki.saao.ac.za/index.php/SPUPNIC). The pipeline by default contains atalses for gratings 6 and 7 (and later 13), but you still need to make sure that they line up with the detected peaks correctly. Once this is done the pipeline should do the wavelength calibration quickly and well. 
+
+### Step 4: Inspect output
+Make sure that the spectrum that is returned looks reasonable. You can 
+
+
+
+
 
 ---
 
