@@ -23,7 +23,7 @@ Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robu
 ## 📦 Installation and Setup
 
 
-### Reccomended: Conda environment 🐍
+### Recommended: Conda environment 🐍
 
 #### Step 1: Create a Virtual Environment
 
@@ -52,12 +52,12 @@ tA --help
 
 #### Step 5: Copy `defaults.json` as template and save in working directory 
 
-The main way you will interact with terminally_ASPIRED is thorugh the config `.json` file, so you should copy the `defaults.json` file to use as a template and rename it to whatever is convienient. 
+The main way you will interact with terminally_ASPIRED is through the config `.json` file, so you should copy the `defaults.json` file to use as a template and rename it to whatever is convenient. 
 You can use a built-in function in terminally_ASPIRED to do this: 
 ```bash
-make-config -n name_of_config_file -O directory_to_store_config
+make-config -n name_of_config_file.json -O directory_to_store_config
 ```
-This will create a copy of the defaults.json file and rename it to what you choose as well as save it to a output directory of your choice. Then when calling terminally_ASPIRED, you can point to your own config file by making use of the `--config` argument. 
+This will create a copy of the defaults.json file and rename it to what you choose (remeber to include the .json extension) as well as save it to a output directory of your choice. Then when calling terminally_ASPIRED, you can point to your own config file by making use of the `--config` argument. 
 
 
 ### Alternative: Python venv 🫙
@@ -78,7 +78,7 @@ source ~/.venv/terminally_ASPIRED/bin/activate
 
 ```bash
 pip install --upgrade setuptools jmespath -i https://pypi.org/simple && \
-pip install pip install terminally-aspired
+pip install terminally-aspired
 ```
 
 #### Step 4: Verify the Installation
@@ -96,7 +96,7 @@ You can use a built-in function in terminally_ASPIRED to do this:
 ```bash
 make-config -n name_of_config_file -O directory_to_store_config
 ```
-This will create a copy of the defaults.json file and rename it to what you choose as well as save it to a output directory of your choice. Then when calling terminally_ASPIRED, you can point to your own config file by making use of the `--config` argument. 
+This will create a copy of the defaults.json file and rename it to what you choose (remeber to include the .json extention) as well as save it to a output directory of your choice. Then when calling terminally_ASPIRED, you can point to your own config file by making use of the `--config` argument. 
 
 ---
 ## 🚀 CLI Usage
@@ -139,9 +139,9 @@ Dark frame correction is not implemented. This is because the CCD used on the 1.
 
 Often, when you have a fresh set of data you will need to carefully monitor how the pipeline deals with trace extraction & wavelength and flux calibration. Therefore for a first run with new data we reccomend to make use of the `--show-plots` argument which will show you the ASPIRED intermediate plots. 
 
-### Step 1: Stadard Star name in `config.json`
+### Step 1: Standard Star name in `config.json`
 
-Remeber to input your standard star name in lower case letters into your `config.json` file under the parameter `standard_name` (examples: hilt600, ltt6248 etc)
+Remember to input your standard star name in lower case letters into your `config.json` file under the parameter `standard_name` (examples: hilt600, ltt6248 etc)
 
 ### Step 2: Run the pipeline with `--show-plots` enabled
 
@@ -150,18 +150,31 @@ tA science.fits arc.fits standard.fits standard_arc.fits -gr 7 -f flat_dir -b bi
 ```
 
 ### Step 3: Wavelength Calibration 
-A particular sticky point is typically wavelength calibration, due to the way in which the auto-detection of the peaks of the arc spectrum works. You can control the wavelength calibration in the `config.json` file, located under the header and  `wavelength_cal`. In particular you need to pay attention to the `prominance` parameter. This sets the level of relative flux above which the auto-peak detection will detect peaks in the arc spectrum. You must make sure that the `prominance` level is such that the peaks that are auto detected match up with the peaks within the wavelength atlas of the chosen grating. You can find the wavelength atlasses for the different grating on the [SAAO SpUpNIC TOPS Wiki](https://topswiki.saao.ac.za/index.php/SPUPNIC). The pipeline by default contains atalses for gratings 6 and 7 (and later 13), but you still need to make sure that they line up with the detected peaks correctly. Once this is done the pipeline should do the wavelength calibration quickly and well. 
+A particular sticky point is typically wavelength calibration, due to the way in which the auto-detection of the peaks of the arc spectrum works. You can control the wavelength calibration in the `config.json` file, located under the header `hough` and  `wavelength_cal`. 
+
+#### `hough`
+Here you need to pay attention to `min_wavelength` and `max_wavelength`, as these will depend on the particular grating and grating angle you use. For:
+- grating 6 : Use `min_wavelength` = 4500  , `max_wavelength` = 7000
+- grating 7 : Use `min_wavelength` = 3500  , `max_wavelength` = 9000
+
+
+#### `wavelength_cal`
+Here you need to pay attention to the `prominence` parameter. This sets the level of relative flux above which the auto-peak detection will detect peaks in the arc spectrum. You must make sure that the `prominence` level is such that the peaks that are auto detected match up with the peaks within the wavelength atlas of the chosen grating. You can find the wavelength atlases for the different grating on the [SAAO SpUpNIC TOPS Wiki](https://topswiki.saao.ac.za/index.php/SPUPNIC). The pipeline by default contains atlases for gratings 6 and 7 (and soon 13), but you still need to make sure that they line up with the detected peaks correctly. You can also add your own lines to these atlases. Once this is done the pipeline should do the wavelength calibration quickly and well. 
 
 ### Step 4: Inspect output
-Make sure that the spectrum that is returned looks reasonable. You can 
+Make sure that the spectrum that is returned looks reasonable. You can plot the error and sky flux by making use of the `--show-error` and `--show-sky` arguments for further confirmation. Alternatively you can use the interactive html plots produced by ASPIRED from the `--show-plots` argument.
 
+### Step 5: Reduce the rest of the data.
+Once you are happy with a particular spectrum from a night, you can process the rest of them by making use of a simple call to terminally_ASPIRED: 
+```bash
+tA science.fits science_arc.fits standard.fits standard_arc.fits -gr 7 --config config.json -f flat_dir -b bias_dir
 
-
-
+```
+This will simply process the images and plot the final spectrum for inspection. 
 
 ---
 
-## ⚙️ Configuration: `defaults.json`
+## ⚙️ Configuration: `config.json`
 This pipeline uses a JSON configuration file to control all steps of spectral reduction and calibration. Below is a description of the parameters and their purpose.
 
 ### 1. Trim Bounds (`trim_bounds`)
@@ -247,7 +260,7 @@ Separate settings exist for **science** and **standard** frames.
 Several output files are created, but there are three main output files that are important:
 
 - `object_name_final.csv` - final fully reduced csv file containing wavelength (Å), flux, flux error, sky flux
-- `object_name_snid.csv` - SNID ready formatted csv file (space-seperated) for quick transient identification
+- `object_name_snid.csv` - SNID ready formatted csv file (space-separated) for quick transient identification
 - `object_name_log_file.txt` - log file containing all terminal output from ASPIRED. If run in verbose mode, you will get all of the useful statistics ASPIRED produces saved in this file. 
 
 ---
@@ -257,7 +270,7 @@ This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally
 
 ---
 ## ☄️Acknowledgements
-Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams within the BlackGEM and MeerLICHT consortia, The University of Cape Town (UCT) and the South African Astronomical Observatory (SAAO). We would like to also thank the exellent developers of the RASCAL and ASPIRED packages.
+Developed by Francois Campher and Lloyd Landsberg as part of our Masters' Dissertations. We aim to provide a useful tool for quick spectral reduction for the transients and variable stars research teams within the BlackGEM and MeerLICHT consortia, The University of Cape Town (UCT) and the South African Astronomical Observatory (SAAO). We would like to also thank the excellent developers of the RASCAL and ASPIRED packages.
 
 ---
 
