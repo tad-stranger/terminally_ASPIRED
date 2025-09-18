@@ -108,6 +108,31 @@ make-config -n name_of_config_file -O directory_to_store_config
 ```
 This will create a copy of the defaults.json file and rename it to what you choose (remeber to include the .json extention) as well as save it to a output directory of your choice. Then when calling terminally_ASPIRED, you can point to your own config file by making use of the `--config` argument. 
 
+### Alternative(Not Reccomended): Clone 
+
+#### Step 1: Clone and Download
+Download or clone this repository, and ensure that you have the following key files:
+
+- The pipeline class:`spectral_reducer.py`
+- The command-line interface: `terminally_ASPIRED.py`
+- The environment file: `environment.py`
+- The `config_files` directory which should contain `defaults.json`
+
+#### Step 2: Set up Conda Environment
+
+We recommend using a virtual environment:
+```bash
+conda env create -f environment.yml
+conda activate terminally_ASPIRED
+```
+
+#### Step 3: Calls to terminally_ASPIRED.py
+If you prefer to download the files like this, then you will need to call terminally_ASPIRED in the following way:
+```bash
+python terminally_ASPIRED.py arguments
+
+```
+
 ---
 ## 🚀 CLI Usage
 ### Basic Usage 
