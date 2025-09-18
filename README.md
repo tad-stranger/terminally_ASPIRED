@@ -300,8 +300,42 @@ Several output files are created, but there are three main output files that are
 
 ---
 
+## 📖 Citation  
+
+If you use **`terminally_ASPIRED`** in your work, please make sure to cite both **ASPIRED** and **terminally_ASPIRED**.  
+
+- **First, cite ASPIRED** (the underlying spectral reduction framework):  
+
+```bibtex
+@ARTICLE{2023AJ....166...13L,
+       author = {{Lam}, Marco C. and {Smith}, Robert J. and {Arcavi}, Iair and {Steele}, Iain A. and {Veitch-Michaelis}, Josh and {Wyrzykowski}, Lukasz},
+        title = "{Automated SpectroPhotometric Image REDuction (ASPIRED)}",
+      journal = {AJ},
+     year = 2023,
+     volume = {166},
+     number = {1},
+     eid = {13},
+     pages = {13},
+     doi = {10.3847/1538-3881/acd75c}
+}
+```
+
+- **Then, cite terminally_ASPIRED** (this pipeline):
+  
+```bibtex
+@software{campher_landsberg2025terminallyASPIRED,
+  author       = {Francois Campher and Lloyd Landsberg},
+  title        = {{terminally_ASPIRED: A command-line spectral reduction pipeline built on ASPIRED}},
+  year         = {2025},
+  publisher    = {Zenodo},
+  version      = {v0.1.0},
+  doi          = {10.5281/zenodo.xxxxxxx},
+  url          = {https://doi.org/10.5281/zenodo.xxxxxxx}
+}
+```
+
 ## 🧪 Developer Notes
-This pipeline is built on the excellent ASPIRED library by Marco Lam. terminally_ASPIRED wraps its lower-level functionality to streamline workflows, reduce bugs, and standardize output for further scientific use.
+This pipeline is built on the excellent ASPIRED toolkit by Marco Lam and Robert Smith. terminally_ASPIRED wraps its lower-level functionality to streamline workflows, reduce bugs, and standardize output for further scientific use.
 
 ---
 ## ☄️Acknowledgements
