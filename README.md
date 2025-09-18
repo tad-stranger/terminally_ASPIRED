@@ -1,7 +1,17 @@
-<h1>
-  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="60" style="vertical-align: middle; margin-right: 12px;">
+<h1 align="left">
+  <img src="assets/terminally_ASPIRED_logo_no_text.png" alt="Logo" width="80" style="vertical-align: middle; margin-right: 12px;">
   terminally_ASPIRED
 </h1>
+
+<p align="left">
+  <a href="https://pypi.org/project/terminally-aspired/">
+    <img src="https://img.shields.io/pypi/v/terminally-aspired?color=blue&label=PyPI" alt="PyPI version">
+  </a>
+  <a href="https://github.com/tad-stranger/terminally_ASPIRED/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/yourusername/terminally_ASPIRED" alt="License">
+  </a>
+  <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python">
+</p>
 
 
  A customizable, command-line-driven spectral reduction pipeline built around the [ASPIRED](https://github.com/cylammarco/ASPIRED) framework — tailored for data from the **SpUpNIC spectrograph** on the **SAAO 1.9m telescope**.
