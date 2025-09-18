@@ -1,5 +1,32 @@
 import argparse
 from spectral_reducer import SpectralReductionPipeline
+import shutil
+from importlib import resources
+from pathlib import Path
+
+def copy_defaults(target_dir: str, new_name: str = "config.json") -> Path:
+    """
+    Copy defaults.json from the package to target_dir under new_name.
+    Returns the full path to the copied file.
+    """
+    target_path = Path(target_dir) / new_name
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with resources.files("terminally_ASPIRED.config_files").joinpath("defaults.json").open("rb") as src:
+        with open(target_path, "wb") as dst:
+            shutil.copyfileobj(src, dst)
+
+    return target_path
+
+def make_config():
+    parser = argparse.ArgumentParser(description="Create a copy of default.json config file for pipline")
+    parser.add_argument("-n", "--name", type = str, default="copy.json", help = "Name of config file")
+    parser.add_argument("-O", "--output-dir", type = str, default="", help = "Specify output directory name. Default is current directory" )
+    args = parser.parse_args()
+
+    config_path = copy_defaults(args.output_dir, args.name)
+    print(f"Defaults copied to {config_path}")
+
 
 def main():
     parser = argparse.ArgumentParser(
