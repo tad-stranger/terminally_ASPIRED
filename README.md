@@ -8,11 +8,13 @@
     <img src="https://img.shields.io/pypi/v/terminally-aspired?color=blue&label=PyPI" alt="PyPI version">
   </a>
   <a href="https://github.com/tad-stranger/terminally_ASPIRED/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/yourusername/terminally_ASPIRED" alt="License">
+    <img src="https://img.shields.io/github/license/tad-stranger/terminally_ASPIRED" alt="License">
   </a>
   <img src="https://img.shields.io/badge/python-3.11%2B-blue" alt="Python">
+  <a href="https://doi.org/10.5281/zenodo.17153499">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.17153499.svg" alt="DOI">
+  </a>
 </p>
-
 
  A customizable, command-line-driven spectral reduction pipeline built around the [ASPIRED](https://github.com/cylammarco/ASPIRED) framework — tailored for data from the **SpUpNIC spectrograph** on the **SAAO 1.9m telescope**.
 Designed for flexibility and reproducibility, `terminally_ASPIRED` combines robust automation with fine-grained user control via configuration files and interactive tools.
@@ -329,8 +331,8 @@ If you use **`terminally_ASPIRED`** in your work, please make sure to cite both 
   year         = {2025},
   publisher    = {Zenodo},
   version      = {v0.1.0},
-  doi          = {10.5281/zenodo.xxxxxxx},
-  url          = {https://doi.org/10.5281/zenodo.xxxxxxx}
+  doi          = {10.5281/zenodo.17153500},
+  url          = {https://doi.org/10.5281/zenodo.17153499}
 }
 ```
 
